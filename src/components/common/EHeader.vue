@@ -33,10 +33,10 @@
         <div v-else class="login-bar full-right">
           <div class="shop-cart full-left">
             <div><img src="/static/image/备忘录.png" alt=""></div>
-            <div><router-link to="/cart">备忘录</router-link></div>
+            <div><router-link to="/">备忘录</router-link></div>
           </div>
           <div class="auth-button">
-            <span class="signin">登录</span>
+            <span class="signin" @click="Goto('/login')">登录</span>
             <a href="/" class="signup" target="_blank">注册</a>
           </div>
         </div>
@@ -110,7 +110,11 @@ export default {
     // this.get_nav()
     // console.log(this.nav_list)
   },
-  // methods: {
+  methods: {
+    Goto(router) {
+      this.$router.push(router)
+    }
+  }
   //   check_user_login () {
   //     // 获取用户的登录状态
   //     this.token = sessionStorage.user_token || localStorage.user_token

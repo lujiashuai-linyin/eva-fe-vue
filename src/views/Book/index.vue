@@ -44,6 +44,9 @@
       </div>
 
     </div>
+    <div class="book-content">
+      
+    </div>
   </div>
 </template>
 
@@ -341,5 +344,6 @@ export default {
  .book .ordering .desc::after{
    border-top-color: #ffc210;
  }
+
 
 </style>

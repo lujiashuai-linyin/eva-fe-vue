@@ -3,6 +3,8 @@ import VueRouter from 'vue-router'
 import Home from '@/views/Home'
 import Index from '@/views/Index'
 import Book from '@/views/Book'
+import Login from '@/views/Login'
+import Register from '@/views/Register'
 
 Vue.use(VueRouter)
 
@@ -25,6 +27,18 @@ const routes = [
       },
 
     ]
+  },
+  {
+    path: '/login',
+    name: 'login',
+    meta: {title: '登录'},
+    component: Login,
+  },
+  {
+    path: '/register',
+    name: 'register',
+    meta: {title: '注册'},
+    component: Register,
   }
 ]
 
