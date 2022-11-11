@@ -15,16 +15,20 @@
           <div class="geetest1">
 
           </div>
-          <div class="rember">
-            <p>
-              <input type="checkbox" class="no" v-model="remember"/>
-              <span class="remember">记住密码</span>
-            </p>
-            <p>忘记密码</p>
-          </div>
           <el-form-item>
-            <el-button type="primary" @click="get_geetest_captcha" style="width: 300px;height: 38px; margin: 15px 57px;;">点击登录</el-button>
+            <el-button type="primary" @click="get_geetest_captcha" style="width: 300px;height: 38px; margin-top: 6px; margin-bottom: 8px; margin-right:  57px; margin-left: 57px">点击登录</el-button>
           </el-form-item>
+          <div class="bottom" id="bottom_web" style="margin-right:  57px; margin-left: 57px; height: 16px; width: 300px;">
+            <div>
+              <a href="#" class="link" id="forgetpwd" target="_blank">找回密码</a>
+            </div>
+            <div>
+              <a href="/register" class="link">注册帐号</a>
+            </div>
+            <div>
+              <a class="link" id="feedback_web" href="#" target="_blank">意见反馈</a>
+            </div>
+          </div>
         </el-form>
       </div>
     </div>
@@ -150,7 +154,7 @@ export default {
 }
 .login-box {
   width: 414px;
-  min-height: 312px;
+  min-height: 300px;
   max-height: 350px;
   background: #fff;
   box-shadow: 0 2px 4px 0 rgba(0,0,0,.5);
@@ -165,7 +169,7 @@ export default {
   display: inline-block;
   width: 300px;
   height: 38px;
-  margin: 0px 57px;
+  margin: 5px 57px;
 }
 
 .title {
@@ -236,9 +240,24 @@ export default {
   position:relative;
   width: 300px;
   max-height: 38px;
-  margin: 0px 57px;
+  margin: 14px 57px;
 }
 .geetest_holder {
   width: 300px;
+}
+.bottom {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  font-size: 12px;
+  color: #000;
+  line-height: 16px;
+  padding-bottom: 11px;
+}
+.link {
+  text-decoration: none;
+  color: #000;
 }
 </style>
