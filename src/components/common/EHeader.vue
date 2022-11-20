@@ -12,28 +12,39 @@
 
         <div v-if="token" class="login-bar full-right">
           <div class="shop-cart full-left">
-            <span class="shop-cart-total">{{$store.state.cart_length}}</span>
-            <img src="/static/image/备忘录.png" alt="">
-            <span><router-link to="/">备忘录</router-link></span>
+            <div><img src="/static/image/备忘录.png" alt=""></div>
+            <div><router-link to="/">日程</router-link></div>
           </div>
-          <div class="login-box login-box1 full-left">
-            <router-link to="/courses">学习中心</router-link>
-            <el-menu width="200" class="member el-menu-demo" mode="horizontal">
-              <el-submenu index="2">
-                <template slot="title"><img src="/static/image/logo@2x.png" alt=""></template>
-                <el-menu-item index="2-1">我的账户</el-menu-item>
-                <el-menu-item index="2-2">我的订单</el-menu-item>
-                <el-menu-item index="2-3">我的优惠卷</el-menu-item>
-                <el-menu-item index="2-3"><span @click="logoutHander">退出登录</span></el-menu-item>
-              </el-submenu>
-            </el-menu>
+          <div class="shop-cart full-left">
+            <div><img src="/static/image/日志.png" alt=""></div>
+            <div><router-link to="/">日志</router-link></div>
+          </div>
+          <div class="shop-cart full-left">
+            <div><img src="/static/image/笔记.png" alt=""></div>
+            <div><router-link to="/">随笔</router-link></div>
+          </div>
+          <div style="width: 130px" class="login-space">
+            <span class="ant-avatar" style="cursor: pointer;">
+              <img :src="this.$store.state.avatar">
+            </span>
+            <el-dropdown trigger="click" size="small">
+              <span class="el-dropdown-link">
+                {{ this.$store.state.nickname }}<i class="el-icon-arrow-down el-icon--right"></i>
+              </span>
+              <el-dropdown-menu slot="dropdown">
+                <div @click="logoutHander">
+                  <el-dropdown-item>注销</el-dropdown-item>
+                </div>
+              </el-dropdown-menu>
+            </el-dropdown>
           </div>
         </div>
 
         <div v-else class="login-bar full-right">
-          <div class="shop-cart full-left">
-            <div><img src="/static/image/备忘录.png" alt=""></div>
-            <div><router-link to="/">备忘录</router-link></div>
+          <div class="search-content">
+            <el-input placeholder="请输入内容" v-model="search_content" class="input-with-select">
+              <el-button slot="append" icon="el-icon-search"></el-button>
+            </el-input>
           </div>
           <div class="auth-button">
             <span class="signin" @click="Goto('/login')">登录</span>
@@ -46,9 +57,12 @@
 </template>
 
 <script>
+import cookie from "js-cookie";
+
 export default {
   data () {
     return {
+      search_content: '',
       token: '',
       nav_id: 0,
       nav_list: [
@@ -92,52 +106,25 @@ export default {
           link: "/",
           title: "图集"
         },
-        {
-          id: 9,
-          link: "/",
-          title: "日志"
-        },
-        {
-          id: 10,
-          link: "/",
-          title: "随笔"
-        }
       ]
     }
   },
   created () {
-    // this.check_user_login()
-    // this.get_nav()
-    // console.log(this.nav_list)
+    this.check_user_login()
   },
   methods: {
+    check_user_login() {
+      this.token = cookie.get('x-token')
+    },
     Goto(router) {
       this.$router.push(router)
+    },
+    logoutHander() {
+      console.log("注销")
+      cookie.remove("x-token")
+      this.$router.push("/login")
     }
   }
-  //   check_user_login () {
-  //     // 获取用户的登录状态
-  //     this.token = sessionStorage.user_token || localStorage.user_token
-  //     return this.token
-  //   },
-  //   get_nav () {
-  //     this.$axios.get(`${this.$settings.HOST}/nav/header/`, {}).then(response => {
-  //       this.nav_list = response.data
-  //     }).catch(error => {
-  //       console.log(error.response)
-  //     })
-  //   },
-  //   logoutHander () {
-  //     // 退出登录
-  //     localStorage.removeItem('user_token')
-  //     localStorage.removeItem('user_id')
-  //     localStorage.removeItem('user_name')
-  //     sessionStorage.removeItem('user_token')
-  //     sessionStorage.removeItem('user_id')
-  //     sessionStorage.removeItem('user_name')
-  //     this.check_user_login()
-  //   }
-  // }
 }
 </script>
 
@@ -213,6 +200,7 @@ export default {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  width: 480px;
 }
 .header .content .logo{
   cursor: pointer; /* 设置光标的形状为爪子 */
@@ -306,4 +294,66 @@ export default {
 .header .login-bar .login-box1{
   margin-top: 16px;
 }
+.login-space {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  width: 150px;
+}
+.ant-avatar {
+  margin-right: 10px;
+}
+.ant-avatar img {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  color: rgba(0,0,0,.65);
+  font-size: 14px;
+  font-variant: tabular-nums;
+  line-height: 1.5;
+  list-style: none;
+  font-feature-settings: "tnum";
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  color: #fff;
+  white-space: nowrap;
+  text-align: center;
+  vertical-align: middle;
+  background: #ccc;
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  border-radius: 50%;
+}
+.el-dropdown-link {
+  cursor: pointer;
+}
+.search-content {
+  width: 260px;
+  height: 36px;
+}
+::v-deep .el-input__inner {
+  height: 38px;
+}
+::v-deep .el-input__inner:focus {
+  outline: none;
+  border: 1px solid #fad065;
+}
+::v-deep .el-input-group__append button.el-button {
+  background-color: #fff;
+  color: orange;
+  border-top: 1px;
+  border-bottom: 1px;
+  height: 36px;
+  margin-top: -6.95px;
+  border-radius: 0;
+}
+::v-deep .el-input-group__append button.el-button:hover {
+  background-color: orange;
+  color: #fff;
+  border-radius: 0;
+}
+
 </style>

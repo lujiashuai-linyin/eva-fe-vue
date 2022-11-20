@@ -5,6 +5,8 @@ import Index from '@/views/Index'
 import Book from '@/views/Book'
 import Login from '@/views/Login'
 import Register from '@/views/Register'
+import Calendar from '@/views/Calendar'
+import Week from '@/views/Calendar/Week'
 
 Vue.use(VueRouter)
 
@@ -26,6 +28,19 @@ const routes = [
         component: Book
       },
 
+    ]
+  },
+  {
+    path: '/calendar',
+    redirect: '/calendar/week',
+    name: 'calendar',
+    component: Calendar,
+    children: [
+      {
+        path: "/calendar/week",
+        meta: {title: '日程'},
+        component: Week
+      },
     ]
   },
   {

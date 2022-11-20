@@ -10,26 +10,32 @@
             <div class="login_entry">可记得有多久未曾停歇？</div>
           </div>
           <el-form-item>
-            <el-input @focus="set_captcha=false" v-model="formLabelAlign.username" placeholder="请输入用户名"></el-input>
+            <el-input @focus="set_captcha=false" v-model="formLabelAlign.username" autocomplete="off" placeholder="请输入用户名"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-input @focus="set_captcha=false" v-model="formLabelAlign.nickname" autocomplete="off" placeholder="请输入昵称"></el-input>
           </el-form-item>
           <el-form-item>
             <el-input @focus="set_captcha=false" type="password" autocomplete="off" v-model="formLabelAlign.password" placeholder="请输入密码"></el-input>
           </el-form-item>
           <el-form-item>
-            <el-input @focus="set_captcha=false" type="password" autocomplete="off" v-model="formLabelAlign.repassword" placeholder="请确认密码"></el-input>
+            <el-input @focus="set_captcha=false" type="password" autocomplete="off" v-model="formLabelAlign.repassword" @change="ensurePassword" placeholder="请确认密码"></el-input>
+            <div style="color: red; margin-right:  57px; margin-left: 57px; text-align: start; line-height: 1px;margin-top: 10px;" v-show="re_password_error">{{re_password_error}}</div>
           </el-form-item>
           <el-form-item>
-            <el-input @focus="set_captcha=true" v-model="formLabelAlign.phone" placeholder="请输入手机号"></el-input>
+            <el-input @focus="set_captcha=true" @change="checkMobile" v-model="formLabelAlign.phone" placeholder="请输入手机号"></el-input>
+            <div style="color: red; margin-right:  57px; margin-left: 57px; text-align: start; line-height: 1px;margin-top: 10px;" v-show="phone_error">{{phone_error}}</div>
           </el-form-item>
           <el-form-item>
-            <el-input v-show="set_captcha" v-model="formLabelAlign.captcha" placeholder="请输入验证码">
+            <el-input v-show="set_captcha" maxlength="6" v-model="formLabelAlign.captcha" placeholder="请输入验证码">
             </el-input>
-            <el-button class="smscode-wrap__btn" :disabled="!formLabelAlign.phone">发送验证码</el-button>
+            <el-button class="smscode-wrap__btn" :disabled="!formLabelAlign.phone||is_send_sms" :class="sms_text !== '点击发送短信'? 'margin':''" @click="smsHander">{{sms_text}}</el-button>
           </el-form-item>
+          <div v-show='code'>{{code}}</div>
           <el-form-item>
-            <el-button type="primary" @click="get_geetest_captcha" style="width: 300px;height: 38px; margin-top: 6px; margin-bottom: 8px; margin-right:  57px; margin-left: 57px">点击注册</el-button>
+            <el-button type="primary" @click="handleregister" style="width: 300px;height: 38px; margin-top: 0px; margin-bottom: 8px; margin-right:  57px; margin-left: 57px">点击注册</el-button>
           </el-form-item>
-          <div class="bottom" id="bottom_web" style="margin-right:  57px; margin-left: 57px; height: 16px; width: 300px;">
+          <div v-show="!set_captcha" class="bottom" id="bottom_web" style="margin-right:  57px; margin-left: 57px; height: 16px; width: 300px;">
             <div>
               <a href="#" class="link" id="forgetpwd" target="_blank">邮箱注册</a>
             </div>
@@ -51,10 +57,17 @@ export default {
   data() {
     return {
       set_captcha: false,
+      is_send_sms: false,
       login_method:0,
+      code: '',
+      sms_text: '点击发送短信',
       labelPosition: 'left',
+      template: 'register',
+      re_password_error: '',
+      phone_error: '',
       formLabelAlign: {
         username: '',
+        nickname: '',
         password: '',
         repassword: '',
         phone: '',
@@ -63,83 +76,93 @@ export default {
     };
   },
   methods: {
-    loginhandler () {
+    checkMobile(){
+      // 检查手机号的合法性[格式和是否已经注册]
+      if(! /1[3-9]\d{9}/.test(this.formLabelAlign.phone)){
+        this.phone_error = "手机号码格式不正确！";
+      }else {
+        this.phone_error = "";
+      }
+    },
+    // 校验确认密码
+    ensurePassword(){
+      if (this.formLabelAlign.repassword !== this.formLabelAlign.password) {
+        this.re_password_error = "两次密码不一致"
+      }else {
+        this.re_password_error = ""
+      }
+    },
+    // 添加短信注册功能
+    smsHander(){
+      // 发送短信
+      // 1. 检查手机格式
+      if(! /1[3-9]\d{9}/.test(this.formLabelAlign.phone)){
+        this.$message.error("手机号码格式不正确！");
+        return false;
+      }
+      this.$axios.get(`/api/v1/user/mobile/${this.formLabelAlign.phone}`).catch(error=>{
+        this.$message.error(error.response.data.message);
+        return
+      });
+      // 2. 判断手机号码是否60s内发送短信
+      if(this.is_send_sms){
+        this.$message.error("当前手机号已经在60秒内发送过短信，请不要频繁发送！");
+        return false;
+      }
+
+      // 3. 发送ajax
+      this.$axios.get(`/api/v1/user/sms/valid`,{params:
+            {mobile:this.formLabelAlign.phone,
+              template:this.template,}
+      }).then(response=>{
+        console.log(response.data);
+        if (response.data.code === 0){
+          this.code === response.data.data.code
+          this.is_send_sms = true;
+          let interval_time = 60;
+          let timer = setInterval(()=>{
+            if(interval_time<=1){
+              // 停止倒计时，允许用户点击发送短信
+              clearInterval(timer);
+              this.is_send_sms=false; // 设置短信发送段的间隔状态为false,允许点击发送短信
+              this.sms_text = "点击发送短信";
+            }else{
+              interval_time--;
+              this.sms_text= `${interval_time}秒后重新点击发送`;
+            }
+          },1000)
+        }
+      }).catch(error=>{
+        this.$message.error(error.response.data.message);
+      });
+    },
+    handleregister() {
       // 用户密码账号登录
-      this.$axios.post(`${this.$settings.HOST}/base/login`, {
-        username: this.formLabelAlign.username,
-        password: this.formLabelAlign.password
+      // 现在只支持手机号
+      this.$axios.post(`/api/v1/user/register`, {
+        userName: this.formLabelAlign.username,
+        passWord: this.formLabelAlign.password,
+        rePassWord: this.formLabelAlign.repassword,
+        nickName: this.formLabelAlign.nickname,
+        phone: this.formLabelAlign.phone,
+        captcha: this.formLabelAlign.captcha,
       }).then(response => {
         console.log(response.data)
-        if (this.remember) {
-          // 记住登录状态
-          sessionStorage.removeItem('user')
-          sessionStorage.removeItem('token')
-          localStorage.user = response.data.data.token
-          localStorage.user = response.data.data.user
-        } else {
-          // 不记住登录状态
-          localStorage.removeItem('user')
-          localStorage.removeItem('token')
-          sessionStorage.user_token = response.data.data.token
-          sessionStorage.user = response.data.data.user
+        if (response.data.code === 0) {
+          let self = this
+          this.$alert('注册成功!', 'eva', {
+            callback() {
+              self.$router.push('/login')
+              // self.$router.go(-1);
+            }
+          })
         }
         // 页面跳转
-        let self = this
-        this.$alert('登录成功!', '路飞学城', {
-          callback () {
-            self.$router.push('/')
-            // self.$router.go(-1);
-          }
-        })
       }).catch(error => {
-        this.$message.error('对不起，登录失败！请确认密码或账号是否正确！')
+        console.log(error)
+        this.$message.error('对不起，注册失败！')
       })
     },
-    get_geetest_captcha () {
-      // 获取验证码
-      this.$axios.get(`${this.$settings.HOST}/base/gt/captcha`, {
-        params: {
-          username: this.formLabelAlign.username
-        }
-      }).then(response => {
-        // 使用initGeetest接口
-        // 参数1：配置参数
-        // 参数2：回调，回调的第一个参数验证码对象，之后可以使用它做appendTo之类的事件
-        // console.log(response.data);
-        initGeetest({
-          gt: response.data.data.gt,
-          challenge: response.data.data.challenge,
-          product: 'popup', // 产品形式，包括：float，embed，popup。注意只对PC版验证码有效
-          offline: false // 表示用户后台检测极验服务器是否宕机，一般不需要关注
-        }, this.handlerPopup)
-      }).catch(error => {
-        console.log("error.response", error.response)
-      })
-    },
-    handlerPopup (captchaObj) {
-      let self = this
-      // 极验验证密码的验证方法
-      captchaObj.onSuccess(function () {
-        var validate = captchaObj.getValidate()
-        // 当用户拖动验证码正确以后，发送请求给后端
-        self.$axios.post(`${self.$settings.HOST}/base/gt/captcha`, {
-          username: self.formLabelAlign.username,
-          geetest_challenge: validate.geetest_challenge,
-          geetest_validate: validate.geetest_validate,
-          geetest_seccode: validate.geetest_seccode
-        }).then(response => {
-          console.log(response.data)
-          // 验证码通过以后，才发送账号和密码进行登录！
-          self.loginhandler()
-        }).catch(error => {
-          console.log(error.response)
-        })
-      })
-      // 为了避免用户反复多次点击登录，造成多个验证码同时存在，所以我们可以先清空原来的验证码
-      document.getElementsByClassName('geetest1').innerHTML = ''
-      // 将验证码加到id为captcha的元素里
-      captchaObj.appendTo('.geetest1')
-    }
   }
 }
 </script>
@@ -198,7 +221,12 @@ export default {
 }
 
 ::v-deep .el-form-item {
-  margin-bottom: 11px;
+  margin-bottom: 10px;
+}
+::v-deep .el-form-item__content {
+  line-height: 0px;
+  position: relative;
+  font-size: 10px;
 }
 
 .title {
@@ -288,6 +316,10 @@ export default {
   text-decoration: none;
   color: #000;
 }
+.margin {
+  color: #ccc;
+  margin-left: -44px;
+}
 .smscode-wrap__btn .disabled {
   color: #ccc;
 }
@@ -296,7 +328,7 @@ export default {
   color: #2e77e5;
   cursor: pointer;
   position: absolute;
-  left: 238px;
+  left: 232px;
   top: 7px;
   border: none;
   display: inline-block;

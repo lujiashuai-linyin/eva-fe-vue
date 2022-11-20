@@ -36,11 +36,13 @@
 </template>
 
 <script>
+import cookie from 'js-cookie';
 export default {
   data() {
     return {
-      remember:false,
+      remember:true,
       login_method:0,
+      user_id: '',
       labelPosition: 'left',
       formLabelAlign: {
         username: '',
@@ -51,27 +53,20 @@ export default {
   methods: {
     loginhandler () {
       // 用户密码账号登录
-      this.$axios.post(`${this.$settings.HOST}/base/login`, {
+      this.$axios.post(`/base/login`, {
         username: this.formLabelAlign.username,
         password: this.formLabelAlign.password
       }).then(response => {
         console.log(response.data)
         if (this.remember) {
           // 记住登录状态
-          sessionStorage.removeItem('user')
-          sessionStorage.removeItem('token')
-          localStorage.user = response.data.data.token
-          localStorage.user = response.data.data.user
-        } else {
-          // 不记住登录状态
-          localStorage.removeItem('user')
-          localStorage.removeItem('token')
-          sessionStorage.user_token = response.data.data.token
-          sessionStorage.user = response.data.data.user
+          // let expires =  response.data.data.expiresAt
+          // console.log("expiresAt", expires)
+          cookie.set("x-token", response.data.data.token, {domain:'localhost', expires: 7})
         }
         // 页面跳转
         let self = this
-        this.$alert('登录成功!', '路飞学城', {
+        this.$alert('登录成功!', 'EVA', {
           callback () {
             self.$router.push('/')
             // self.$router.go(-1);
@@ -83,7 +78,7 @@ export default {
     },
     get_geetest_captcha () {
       // 获取验证码
-      this.$axios.get(`${this.$settings.HOST}/base/gt/captcha`, {
+      this.$axios.get(`/base/gt/captcha`, {
         params: {
           username: this.formLabelAlign.username
         }
@@ -91,7 +86,9 @@ export default {
         // 使用initGeetest接口
         // 参数1：配置参数
         // 参数2：回调，回调的第一个参数验证码对象，之后可以使用它做appendTo之类的事件
-        // console.log(response.data);
+        console.log(response.data);
+        this.user_id = response.data.data.user_id.toString()
+        console.log("user_id", response.data.data.user_id)
         initGeetest({
           gt: response.data.data.gt,
           challenge: response.data.data.challenge,
@@ -108,8 +105,8 @@ export default {
       captchaObj.onSuccess(function () {
         var validate = captchaObj.getValidate()
         // 当用户拖动验证码正确以后，发送请求给后端
-        self.$axios.post(`${self.$settings.HOST}/base/gt/captcha`, {
-          username: self.formLabelAlign.username,
+        self.$axios.post(`/base/gt/captcha`, {
+          user_id: self.user_id,
           geetest_challenge: validate.geetest_challenge,
           geetest_validate: validate.geetest_validate,
           geetest_seccode: validate.geetest_seccode

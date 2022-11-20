@@ -10,6 +10,7 @@
 
 <script>
 export default {
+  props:[],
   data(){
     return {
       banner_list:[

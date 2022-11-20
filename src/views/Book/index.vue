@@ -1,6 +1,6 @@
 <template>
   <div class="book">
-    <div class="tags-row">
+    <div v-if="token" class="tags-row">
       <div class="wrap">
         <div class="search-area" id="searchArea">
           <input class="search-input" type="text" id="search" maxlength="50" placeholder="输入作品名/作者名">
@@ -52,9 +52,14 @@
 
 <script>
 import EBanner from "@/components/common/EBanner";
+import cookie from "js-cookie";
 export default {
+  created() {
+    this.token = cookie.get("x-token");
+  },
   data(){
     return{
+      token: '',
       category: -1,
       category_list:[
         {
