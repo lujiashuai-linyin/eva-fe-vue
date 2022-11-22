@@ -1,219 +1,258 @@
 <template>
-  <div class="app-container" id="calendar-tab">
-    <div style="height: 100%; width: 100%;">
-      <div class="default-page">
-        <div class="tool-panel" style="width: 256px;">
-          tool-panel
-        </div>
-        <div class="calendar-view">
-          <div style="width: 100%;">
-            <div class="tool-bar tool-bar-timeRight lark-draggable" style="height: 60px;">
-              <div class="nav-label">
-                <div class="tool-bar-navigator week">
-                  <div class="label-btn lark-drag-disable align-left"
-                       @click="closeToolPanel"
-                  > {{ triger }} </div>
-                  <el-button
-                      icon="el-icon-arrow-left"
-                      @click="getPrev"
-                      class="fc_btns"
-                  ></el-button>
-                  <el-button
-                      icon="el-icon-arrow-right"
-                      @click="getNext"
-                      class="fc_btns"
-                  ></el-button>
-                </div>
-                <div :class="current_label==='day'?'today-label':'week-label'">
-                  <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ title }}</span>
-                </div>
-              </div>
-              <div class="nav-wrapper">
-                <div class="mode-section">
-                  <el-button-group>
-                    <el-button
-                        @click="today"
-                        type="success"
-                        size="medium"
-                        :class="istoday?'today-selected':'fc_btns_right_today'"
-                    >今天</el-button
-                    >
-                    <el-button
-                        @click="month"
-                        type="primary"
-                        size="medium"
-                        :class="current_label==='month'?'other-selected':'fc_btns_right'"
-                    >月</el-button
-                    >
-                    <el-button
-                        @click="week"
-                        type="primary"
-                        size="medium"
-                        :class="current_label==='week'?'other-selected':'fc_btns_right'"
-                    >周</el-button
-                    >
-                    <el-button
-                        @click="day"
-                        type="primary"
-                        size="medium"
-                        :class="current_label==='day'?'other-selected':'fc_btns_right'"
-                    >日</el-button
-                    >
-                    <el-button
-                        @click="list"
-                        type="primary"
-                        size="medium"
-                        :class="current_label==='list'?'other-selected':'fc_btns_right'"
-                    >列表</el-button
-                    >
-                  </el-button-group>
-                </div>
-                <div _pp-theme="light" class="menu-list">
-                  <span class="universe-icon">
-                    <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" data-icon="DialpadOutlined">
-                      <path d="M4 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm2 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm6-14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm2 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm-2 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm8-16a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm2 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm-2 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" fill="currentColor"></path>
-                    </svg>
-                  </span>
-                </div>
-                <div _pp-theme="light" data-version="5.4.11" class="_pp-trigger-container node_modules-@byted-larklet-calendar-es-electron-render-calendar-modules-Calendar-ToolBarTemplate-corner-index-web-module__user-panel-wrapper--Hac3E">
-                  <div class="_pp-trigger-container _pp-control-close">
-                    <div class="_pp-header-avatar-box">
-                      <div class="_pp-header-avatar">
-                        <img src="https://s1-imfile.feishucdn.com/static-resource/v1/v2_7cd110ab-3889-4505-8d46-b9e8fde9532g~?image_size=noop&amp;cut_type=&amp;quality=&amp;format=image&amp;sticker_format=.webp">
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- 日历本体 -->
-          <el-col>
-            <div style="margin-left: 0px">
-              <FullCalendar ref="fullCalendar" :options="calendarOptions" />
-            </div>
-            <!-- 事件添加或修改对话框 -->
-            <el-dialog
-                :visible.sync="dialogVisible"
-                :popperAppendToBody="false"
-                @close="cancel"
-                v-dialogDrag
-                :close-on-click-modal="false"
-                class="calendar_matters"
+  <!-- el-mian是个人右侧容器的设置组件 -->
+  <el-main>
+    <div>
+      <!-- 日历头部div -->
+      <div class="fc-toolbar" style="display: flex; margin-bottom: 2px">
+        <!-- 日历头部左侧显示区域 -->
+        <div class="fc-left" style="flex: 1; justify-content: flex-start">
+          <div style="vertical-align: middle">
+            <el-input
+                placeholder="请输入查询内容"
+                v-model="search_input"
+                clearable
+                class="input"
+                size="medium"
+                @keyup.enter.native="onSearch"
+                @clear="getToday()"
             >
-              <div slot="title" class="header-title" :style="{ color: 'black' }">
-                <i class="el-icon-edit"></i><span> &nbsp;事件</span>
-              </div>
-              <el-form ref="form" :model="form" label-width="80px">
-                <el-row>
-                  <el-col :span="12" :xs="24">
-                    <el-form-item label="事件时间">
-                      <div class="dateRange">
-                        <el-date-picker
-                            v-model="dateRange"
-                            type="datetimerange"
-                            range-separator="至"
-                            start-placeholder="开始日期"
-                            end-placeholder="结束日期"
-                        >
-                        </el-date-picker>
-                      </div>
-                    </el-form-item>
-                  </el-col>
-                  <el-col :span="12"> </el-col>
-                </el-row>
-                <el-row>
-                  <el-col :span="24"
-                  ><el-form-item label="具体事项">
-                    <el-input
-                        v-model="form.remark"
-                        type="textarea"
-                        class="calendar_details"
-                    ></el-input> </el-form-item
-                  ></el-col>
-                </el-row>
-                <el-row>
-                  <el-col :span="12" :xs="24"
-                  ><el-form-item label="提醒类别" prop="deptId">
-                    <treeselect
-                        v-model="form.category"
-                        :options="Options"
-                        :props="defaultProps"
-                        :show-count="true"
-                        placeholder="请选择类型"
-                        @select="categorySelected"
-                    /> </el-form-item
-                  ></el-col>
-                  <el-col :span="12" :xs="24"
-                  ><el-form-item
-                      v-if="form.userId == undefined"
-                      label="记录人"
-                      prop="userName"
-                  >
-                    <el-input
-                        v-model="form.userName"
-                        maxlength="30"
-                        disabled
-                        class="userName"
-                    /> </el-form-item
-                  ></el-col>
-                </el-row>
+              <i slot="suffix" class="el-icon-search" @click="onSearch"></i>
+            </el-input>
+          </div>
+        </div>
+        <!-- 日历头部中间显示区域 -->
+        <div
+            class="fc-center"
+            style="display: flex; flex: 3; justify-content: center"
+        >
+          <el-button-group>
+            <el-button
+                icon="el-icon-d-arrow-left"
+                @click="getPrevYear"
+                class="fc_btns"
+            ></el-button>
+            <el-button
+                icon="el-icon-arrow-left"
+                @click="getPrev"
+                class="fc_btns"
+            ></el-button>
+          </el-button-group>
+          <h2 class="title">
+            {{ title }}
+          </h2>
+          <el-button-group>
+            <el-button
+                icon="el-icon-arrow-right"
+                @click="getNext"
+                class="fc_btns"
+            ></el-button>
+            <el-button
+                icon="el-icon-d-arrow-right"
+                @click="getNextYear"
+                class="fc_btns"
+            ></el-button>
+          </el-button-group>
+        </div>
+        <!-- 显示图标注释栏 -->
+        <!-- <div class="tips" style="display: flex">
+          <div
+            style="
+              height: 14px;
+              width: 14px;
+              background: green;
+              text-align: center;
+              position: relative;
+              top: 27%;
+            "
+          ></div>
+          <span class="tip-content">已完成</span>
+          <div
+            style="
+              height: 14px;
+              width: 14px;
+              background: #fe9b02;
+              text-align: center;
+              position: relative;
+              top: 27%;
+            "
+          ></div>
+          <span class="tip-content">未开始</span>
+        </div> -->
+        <!-- 日历头部右侧显示区域 -->
+        <div class="fc-right">
+          <el-button-group>
+            <el-button
+                @click="today"
+                type="success"
+                plain
+                size="medium"
+                class="fc_btns"
+            >今天</el-button
+            >
+            <el-button
+                @click="month"
+                type="primary"
+                plain
+                size="medium"
+                class="fc_btns"
+            >月</el-button
+            >
+            <el-button
+                @click="week"
+                type="primary"
+                plain
+                size="medium"
+                class="fc_btns"
+            >周</el-button
+            >
+            <el-button
+                @click="day"
+                type="primary"
+                plain
+                size="medium"
+                class="fc_btns"
+            >日</el-button
+            >
+            <el-button
+                @click="list"
+                type="primary"
+                plain
+                size="medium"
+                class="fc_btns"
+            >列表</el-button
+            >
+          </el-button-group>
+        </div>
+      </div>
+    </div>
+    <!-- 日历本体 -->
+    <el-row>
+      <el-col :md="24" :xs="24">
+        <div style="margin-top: 0px">
+          <FullCalendar ref="fullCalendar" :options="calendarOptions" />
+        </div>
+        <!-- 事件添加或修改对话框 -->
+        <el-dialog
+            :visible.sync="dialogVisible"
+            :popperAppendToBody="false"
+            @close="cancel"
+            v-dialogDrag
+            :close-on-click-modal="false"
+            class="calendar_matters"
+        >
+          <div slot="title" class="header-title" :style="{ color: 'black' }">
+            <i class="el-icon-edit"></i><span> &nbsp;事件</span>
+          </div>
+          <el-form ref="form" :model="form" label-width="80px">
+            <el-row>
+              <el-col :span="12" :xs="24">
+                <el-form-item label="事件时间">
+                  <div class="dateRange">
+                    <el-date-picker
+                        v-model="dateRange"
+                        type="datetimerange"
+                        range-separator="至"
+                        start-placeholder="开始日期"
+                        end-placeholder="结束日期"
+                    >
+                    </el-date-picker>
+                  </div>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12"> </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="24"
+              ><el-form-item label="具体事项">
+                <el-input
+                    v-model="form.remark"
+                    type="textarea"
+                    class="calendar_details"
+                ></el-input> </el-form-item
+              ></el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="12" :xs="24"
+              ><el-form-item label="提醒类别" prop="deptId">
+                <treeselect
+                    v-model="form.category"
+                    :options="Options"
+                    :props="defaultProps"
+                    :show-count="true"
+                    placeholder="请选择类型"
+                    @select="categorySelected"
+                /> </el-form-item
+              ></el-col>
+              <el-col :span="12" :xs="24"
+              ><el-form-item
+                  v-if="form.userId == undefined"
+                  label="记录人"
+                  prop="userName"
+              >
+                <el-input
+                    v-model="form.userName"
+                    maxlength="30"
+                    disabled
+                    class="userName"
+                /> </el-form-item
+              ></el-col>
+            </el-row>
 
-                <el-row>
-                  <el-col :span="12"> </el-col>
-                  <el-col :span="12" :xs="24">
-                    <el-form-item label="状态">
-                      <el-radio-group v-model="form.isDone">
-                        <el-radio label="0">已完成</el-radio>
-                        <el-radio label="1">未确认</el-radio>
-                      </el-radio-group>
-                    </el-form-item>
-                  </el-col>
-                </el-row>
-                <el-row>
-                  <el-col :span="18" :xs="24">
-                    <el-form-item label="附件" class="attachment" prop="address">
-                      <el-upload
-                          action="#"
-                          :show-file-list="false"
-                          :auto-upload="false"
-                          :on-change="address_beforeupload"
-                      >
-                        <div>
-                          <el-button
-                              type="primary"
-                              icon="el-icon-folder-opened"
-                          ></el-button>
-                        </div>
-                      </el-upload>
-                      <el-input
-                          v-model="form.address"
-                          clearable
-                      ></el-input></el-form-item
-                    ></el-col>
-                </el-row>
-                <el-row>
-                  <el-col :span="24" :xs="24">
-                    <el-form-item label="相关图片" prop="address">
-                      <el-upload
-                          ref="uploadFile"
-                          class="upload-demo"
-                          action="#"
-                          :auto-upload="false"
-                          :show-file-list="true"
-                          :on-change="beforeupload"
-                          list-type="picture-card"
-                          :file-list="filelist"
-                          multiple
-                      >
-                        <i slot="default" class="el-icon-plus"></i>
-                        <div slot="file" slot-scope="{ file }">
-                          <img
-                              class="el-upload-list__item-thumbnail"
-                              :src="file.url"
-                              alt=""
-                          />
-                          <span class="el-upload-list__item-actions">
+            <el-row>
+              <el-col :span="12"> </el-col>
+              <el-col :span="12" :xs="24">
+                <el-form-item label="状态">
+                  <el-radio-group v-model="form.isDone">
+                    <el-radio label="0">已完成</el-radio>
+                    <el-radio label="1">未确认</el-radio>
+                  </el-radio-group>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="18" :xs="24">
+                <el-form-item label="附件" class="attachment" prop="address">
+                  <el-upload
+                      action="#"
+                      :show-file-list="false"
+                      :auto-upload="false"
+                      :on-change="address_beforeupload"
+                  >
+                    <div>
+                      <el-button
+                          type="primary"
+                          icon="el-icon-folder-opened"
+                      ></el-button>
+                    </div>
+                  </el-upload>
+                  <el-input
+                      v-model="form.address"
+                      clearable
+                  ></el-input></el-form-item
+                ></el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="24" :xs="24">
+                <el-form-item label="相关图片" prop="address">
+                  <el-upload
+                      ref="uploadFile"
+                      class="upload-demo"
+                      action="#"
+                      :auto-upload="false"
+                      :show-file-list="true"
+                      :on-change="beforeupload"
+                      list-type="picture-card"
+                      :file-list="filelist"
+                      multiple
+                  >
+                    <i slot="default" class="el-icon-plus"></i>
+                    <div slot="file" slot-scope="{ file }">
+                      <img
+                          class="el-upload-list__item-thumbnail"
+                          :src="file.url"
+                          alt=""
+                      />
+                      <span class="el-upload-list__item-actions">
                         <span
                             class="el-upload-list__item-preview"
                             @click="handlePictureCardPreview(file)"
@@ -235,47 +274,48 @@
                           <i class="el-icon-delete"></i>
                         </span>
                       </span>
-                        </div>
-                      </el-upload>
-                    </el-form-item>
-                  </el-col>
-                </el-row>
-              </el-form>
-              <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="submitForm">确 定</el-button>
-                <el-button @click="cancel">取 消</el-button>
-              </div>
-            </el-dialog>
-            <!-- 图片预览对话框 -->
-            <!--        <el-image-viewer-->
-            <!--            v-if="img_dialogVisible"-->
-            <!--            :initial-index="0"-->
-            <!--            :on-close="onClose"-->
-            <!--            :url-list="dialogImageUrl"-->
-            <!--            style="z-index: 3000"-->
-            <!--        ></el-image-viewer>-->
-          </el-col>
-          <div class="add-new-event-btn">
-            +
+                    </div>
+                  </el-upload>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="submitForm">确 定</el-button>
+            <el-button @click="cancel">取 消</el-button>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
+        </el-dialog>
+        <!-- 图片预览对话框 -->
+<!--        <el-image-viewer-->
+<!--            v-if="img_dialogVisible"-->
+<!--            :initial-index="0"-->
+<!--            :on-close="onClose"-->
+<!--            :url-list="dialogImageUrl"-->
+<!--            style="z-index: 3000"-->
+<!--        ></el-image-viewer>-->
+      </el-col>
+    </el-row>
+  </el-main>
 </template>
 
 <script>
+// import { getCalendarList } from "@/api/calendar.js";
 import FullCalendar from "@fullcalendar/vue";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
+// import tippy from "tippy.js";
+// import "../../assets/tippy.css";
+// import calendar from "../../utils/calendar.js";
+// import { INITIAL_EVENTS, createEventId } from "./event-utils";
 import { auto } from "@popperjs/core";
+// import "../../directives.js"; // v-dialogDrag: 弹窗可拖拽属性
 import Treeselect from "@riophae/vue-treeselect"; // Treeselect插件
 import "@riophae/vue-treeselect/dist/vue-treeselect.css"; // 若依css设置
-import '@fullcalendar/core/vdom'
+import '@fullcalendar/core/vdom' // solves problem with Vite
 export default {
-// 注册局部组件
+  // 注册局部组件
   components: {
     FullCalendar,
     Treeselect,
@@ -284,9 +324,6 @@ export default {
   },
   data() {
     return {
-      istoday: false,
-      current_label: '',
-      triger: '<<收起',
       // 搜索框输入的文本
       search_input: "",
 
@@ -364,19 +401,13 @@ export default {
         // validRange: { start: "2021-09-01", end: "2021-09-01" }, // 可展示区间
         // 引入的插件，比如fullcalendar/daygrid，fullcalendar/timegrid引入后才可显示月，周，日
         plugins: [dayGridPlugin, interactionPlugin, timeGridPlugin, listPlugin],
-        initialView: "timeGridDay", // 默认为那个视图（月：dayGridMonth，周：timeGridWeek，日：timeGridDay）
+        initialView: "dayGridMonth", // 默认为那个视图（月：dayGridMonth，周：timeGridWeek，日：timeGridDay）
         firstDay: 1, // 设置一周中显示的第一天是哪天，周日是0，周一是1，类推
         locale: "zh-cn", // 切换语言，当前为中文
         allDaySlot: true, // 不显示all-day
-        businessHours: false, //
+        businessHours: true, //
         handleWindowResize: true, // 是否随浏览器窗口大小变化而自动变化。
-        allDayText: "GMT+8", // 设置all-Day显示的文字，不设置的话默认显示"all-Day"
-        slotDuration: '00:15:00', // 在agenda的视图中, 两个时间之间的间隔(分钟)
-        slotLabelInterval: "01:00",
-        scrollTime: "09:00:00",
-        unselectAuto: true,
-        defaultEventMinutes: 30,// 事件默认的时间执行长度，如果事件对象没有指定执行多长时间，则默认执行1h
-        // scrollTime: '09:15:00',
+        allDayText: "全天", // 设置all-Day显示的文字，不设置的话默认显示"all-Day"
         themeSystem: "bootstrap", // 主题色(本地测试未能生效)
         // loading: this.loadingEvent, // 视图数据加载中、加载完成触发（用于配合显示/隐藏加载指示器。）
         // selectAllow: this.selectAllow, //编程控制用户可以选择的地方，返回true则表示可选择，false表示不可选择
@@ -395,15 +426,14 @@ export default {
         // weekends: true, //
         // navLinks: true, // 天链接
         selectHelper: false,
-        stickyHeaderDates: true,// 粘性
         // slotEventOverlap: false, // 相同时间段的多个日程视觉上是否允许重叠，默认true允许
-        aspectRatio: 20, //设置日历单元格宽度与高度的比例。
-        expandRows: false,
+        aspectRatio: 1.35, //设置日历单元格宽度与高度的比例。
+        expandRows: true,
+        height: auto,
         contentHeight: 100,
-        height: 800,
         nowIndicator: true, //周/日视图中显示今天当前时间点（以红线标记），默认false不显示
         weekMode: "fixed", //在月视图里显示周的模式，因为每月周数可能不同，所以月视图高度不一定。fixed：固定显示6周高，日历高度保持不变liquid：不固定周数，高度随周数变化variable：不固定周数，但高度固定
-        weekNumbers: false, //是否在日历中显示周次(一年中的第几周)，如果设置为true，则会在月视图的左侧、周视图和日视图的左上角显示周数。
+        weekNumbers: true, //是否在日历中显示周次(一年中的第几周)，如果设置为true，则会在月视图的左侧、周视图和日视图的左上角显示周数。
         weekText: "周",
         customButtons: {
           //自定义按钮
@@ -419,14 +449,14 @@ export default {
             text: "<",
             click: this.getPrev,
           },
-          // getPrevYear: {
-          //   text: "<<",
-          //   click: this.getPrevYear,
-          // },
-          // getNextYear: {
-          //   text: ">>",
-          //   click: this.getNextYear,
-          // },
+          getPrevYear: {
+            text: "<<",
+            click: this.getPrevYear,
+          },
+          getNextYear: {
+            text: ">>",
+            click: this.getNextYear,
+          },
           customButton: {
             text: "今日标记全部已完成",
             click: this.customButton,
@@ -538,37 +568,28 @@ export default {
     },
   },
   methods: {
-    // 关闭左侧工具栏
-    closeToolPanel() {
-
-    },
     // 将当前时间移至今日事件
     today() {
-      this.istoday = true;
       this.getToday();
     },
     // 月视图
     month() {
-      this.current_label = 'month';
       this.calendarApi.changeView("dayGridMonth");
       this.title = this.calendarApi.view.title;
     },
     // 周视图
     week() {
-      this.current_label = 'week';
       this.calendarApi.changeView("timeGridWeek");
       this.title = this.calendarApi.view.title;
     },
     // 日视图
     day() {
-      this.current_label = 'day';
       this.calendarApi.changeView("timeGridDay");
       this.handleTime(this.calendarApi.currentData.dateProfile.activeRange);
       this.title = this.calendarApi.view.title;
     },
     // 列表视图
     list() {
-      this.current_label = 'list'
       this.calendarApi.changeView("listMonth");
       this.title = this.calendarApi.view.title;
     },
@@ -658,9 +679,22 @@ export default {
       this.title = this.calendarApi.view.title;
       this.search_input = "";
     },
+    // 上一年
+    getPrevYear() {
+      let calendarApi = this.$refs.fullCalendar.getApi();
+      calendarApi.prevYear();
+      // this.handleTime(calendarApi.currentData.dateProfile.activeRange);
+      this.title = this.calendarApi.view.title;
+    },
+    // 下一年
+    getNextYear() {
+      let calendarApi = this.$refs.fullCalendar.getApi();
+      calendarApi.nextYear();
+      // this.handleTime(calendarApi.currentData.dateProfile.activeRange);
+      this.title = this.calendarApi.view.title;
+    },
     // 上一月
     getPrev() {
-      this.istoday = false
       let calendarApi = this.$refs.fullCalendar.getApi();
       calendarApi.prev();
       // this.handleTime(calendarApi.currentData.dateProfile.activeRange);
@@ -668,7 +702,6 @@ export default {
     },
     // 下一月
     getNext() {
-      this.istoday = false
       let calendarApi = this.$refs.fullCalendar.getApi();
       calendarApi.next();
       // this.handleTime(calendarApi.currentData.dateProfile.activeRange);
@@ -687,40 +720,40 @@ export default {
       // 以当前时间插入数据
       // let _this = this;
       // 注意，请求的数据是数据库所有数据即可，不用考虑当前显示的时间范围，Fullcalendar会自动只显示当前日期范围的事件
-      //   _this
-      //       .get("/calendar/getCalendarList", "")
-      //       .then((res) => {
-      //         _this.calendarOptions.events = [];
-      //         res.data.data.forEach((item) => {
-      //           var data = {
-      //             id: item[0],
-      //             title: item[1],
-      //             start: item[2],
-      //             end: item[3],
-      //             allDay: item[4],
-      //             className: item[5] == true ? "borderGreen" : "borderOrange",
-      //             // 非标准字段:除上述字段外，您还可以在每个事件对象中包含自己的非标准字段。FullCalendar不会修改或删除这些字段。例如，开发人员通常包括描述在回调中使用的字段，如事件呈现挂钩. 任何非标准属性都将移动到extendedProps哈希期间事件解析.
-      //             extendedProps: {
-      //               isDone: item[5],
-      //               img: item[6],
-      //               address: item[7],
-      //               type: item[8],
-      //             },
-      //             others: "该字段值会被自动归类到extendedProps里面",
-      //             backgroundColor:
-      //                 (item[4] == true ? "all_Day" : "other") != "all_Day"
-      //                     ? item[5] == true
-      //                         ? "#c2fccd"
-      //                         : "#FFECDC"
-      //                     : "#66b1ff",
-      //             editable: true, // 是否可以进行（拖动、缩放）修改
-      //           };
-      //           _this.calendarOptions.events.push(data);
-      //         });
-      //       })
-      //       .catch((error) => {
-      //         this.$message.error(error);
-      //       });
+    //   _this
+    //       .get("/calendar/getCalendarList", "")
+    //       .then((res) => {
+    //         _this.calendarOptions.events = [];
+    //         res.data.data.forEach((item) => {
+    //           var data = {
+    //             id: item[0],
+    //             title: item[1],
+    //             start: item[2],
+    //             end: item[3],
+    //             allDay: item[4],
+    //             className: item[5] == true ? "borderGreen" : "borderOrange",
+    //             // 非标准字段:除上述字段外，您还可以在每个事件对象中包含自己的非标准字段。FullCalendar不会修改或删除这些字段。例如，开发人员通常包括描述在回调中使用的字段，如事件呈现挂钩. 任何非标准属性都将移动到extendedProps哈希期间事件解析.
+    //             extendedProps: {
+    //               isDone: item[5],
+    //               img: item[6],
+    //               address: item[7],
+    //               type: item[8],
+    //             },
+    //             others: "该字段值会被自动归类到extendedProps里面",
+    //             backgroundColor:
+    //                 (item[4] == true ? "all_Day" : "other") != "all_Day"
+    //                     ? item[5] == true
+    //                         ? "#c2fccd"
+    //                         : "#FFECDC"
+    //                     : "#66b1ff",
+    //             editable: true, // 是否可以进行（拖动、缩放）修改
+    //           };
+    //           _this.calendarOptions.events.push(data);
+    //         });
+    //       })
+    //       .catch((error) => {
+    //         this.$message.error(error);
+    //       });
     },
 
     // 选择日期，填写事件
@@ -761,7 +794,7 @@ export default {
           this.$message.success("事件添加成功！");
           this.handleTime(calendarApi.currentData.dateProfile.activeRange);
         });
-      } else if (this.form_edited_state === "amend") {
+      } else if (this.form_edited_state == "amend") {
         // 修改事件的后端数据请求
         this.get(
             "/calendar/submit",
@@ -769,17 +802,17 @@ export default {
               id: this.form.id,
               dateRange: JSON.stringify([startTime, endTime]),
               remark: this.form.remark,
-              type: this.form.type === undefined ? "" : this.form.type,
-              isDone: this.form.isDone === "1" ? false : true,
+              type: this.form.type == undefined ? "" : this.form.type,
+              isDone: this.form.isDone == "1" ? false : true,
               userName: this.form.userName,
-              address: this.form.address === undefined ? "" : this.form.address,
-              img: this.form.img === null ? "" : this.form.img,
+              address: this.form.address == undefined ? "" : this.form.address,
+              img: this.form.img == null ? "" : this.form.img,
               // type: this.form.category,
             },
             ""
         ).then((res) => {
           this.$message.success("修改事项成功！");
-          if (this.search_input === "") {
+          if (this.search_input == "") {
             this.handleTime(calendarApi.currentData.dateProfile.activeRange);
           }
         });
@@ -986,7 +1019,7 @@ export default {
     onSearch() {
       let search_text = this.search_input;
       let curr_Events = this.calendarOptions.events;
-      if (search_text !== "") {
+      if (search_text != "") {
         this.calendarApi.changeView("list");
         let result = this.searchStr(search_text, curr_Events);
         this.calendarOptions.events = result;
@@ -1139,286 +1172,239 @@ export default {
       });
     },
   },
-}
+};
 </script>
 
-<style scoped>
-#calendar-tab {
-  background-color: #fff;
-  overflow: hidden;
-  width: 100%;
+<!-- 样式1，本地样式 -->
+<style lang="scss" scoped>
+.calendar_matters >>> .el-dialog__body {
+  height: 450px;
+  overflow: auto;
 }
-#calendar-tab, #root {
-  height: 100%;
-  position: relative;
+.calendar_details >>> .el-textarea__inner {
+  font-weight: bold;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #000;
+  height: 120px;
 }
-.default-page {
-  align-items: flex-start;
-  display: flex;
-  height: 100%;
-  justify-content: space-between;
-  width: 100%;
+.calendar_matters >>> .el-dialog__header {
+  border-radius: 5px;
+  background-color: #cae1f7;
+  align-content: center;
+  padding: 15px;
+  font-weight: bold;
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-bottom-color: aliceblue;
 }
-.default-page .tool-panel {
-  background-color: #f8f9fa;
-  display: flex;
-  flex: none;
-  flex-direction: column;
-  height: 100%;
-  min-width: 230px;
-  width: 230px;
-}
-.default-page .calendar-view {
-  align-items: center;
-  display: flex;
-  flex: auto;
-  flex-direction: column;
-  height: 100%;
-  justify-content: space-between;
-  overflow: hidden;
-  user-select: none;
-  width: 100%;
-}
-.calendar-view .calendar {
-  align-items: center;
-  display: flex;
-  flex: auto;
-  flex-direction: column;
-  height: 100%;
-  justify-content: space-between;
-  min-height: 0;
-  position: relative;
-  width: 100%;
-}
-.calendar-view .tool-bar {
-  align-items: center;
-  box-sizing: border-box;
-  display: flex;
-  flex: none;
-  justify-content: flex-end;
-  padding: 0 0 0 16px;
-  width: 100%;
-}
-.calendar-view .tool-bar .nav-label {
-  display: flex;
-  flex: 1;
-}
-.tool-bar-navigator, .tool-bar-navigator .btn {
-  align-items: center;
-  box-sizing: border-box;
-  display: flex;
-  flex: none;
-}
-.tool-bar-navigator {
-  align-self: center;
-  background-color: #fff;
-  color: #646a73;
-  height: 36px;
-  justify-content: space-between;
-  padding: 0 8px 0 0;
-}
-.tool-bar-navigator .label-btn {
-  align-items: center;
-  border: 1px solid #c2e7b0;
-  background-color: #f0f9eb;
-  border-radius: 4px;
-  color: #67C23A;;
-  cursor: pointer;
-  display: flex;
-  flex: auto;
-  font-size: 12px;
-  height: 30px;
-  justify-content: center;
-  margin: 0;
-  min-width: 50px;
-  padding: 0 5px;
-}
-.tool-bar-navigator .label-btn.align-left {
-  margin-right: 8px;
-}
-.tool-bar-navigator .btn {
-  border-radius: 4px;
-  cursor: pointer;
-  height: 22px;
-  justify-content: center;
-  margin: 1px 2px 0;
-  width: 22px;
-}
-navigator .btn {
-  align-items: center;
-  box-sizing: border-box;
-  display: flex;
-  flex: none;
-}
-.tool-bar-navigator .btn {
-  border-radius: 4px;
-  cursor: pointer;
-  height: 22px;
-  justify-content: center;
-  margin: 1px 2px 0;
-  width: 22px;
-}
-.tool-bar-navigator .btn {
-  align-items: center;
-  box-sizing: border-box;
-  display: flex;
-  flex: none;
-}
-.calendar-view .tool-bar .week-label {
-  align-items: center;
-  color: #335fa2;
-  cursor: default;
-  display: flex;
-  flex: 1;
-  font-family: DINAlternate-Bold,PingFangSC-Semibold,Microsoft Yahei,Myriad Pro,Hiragino Sans GB,sans-serif;
-  font-size: 18px;
-  font-weight: 600;
-  justify-content: flex-start;
+.fc-daygrid-day-top p {
+  font-size: 13px;
+  color: #606266;
   margin-right: 10px;
+}
+.fc .fc-toolbar.fc-header-toolbar {
+  margin-bottom: 10px;
+}
+.el-main {
+  padding: 8px 10px 8px 10px;
+}
+.userName >>> .el-input__inner {
+  font-weight: bold;
+  color: #000000ab;
+}
+.attachment >>> .el-form-item__content {
+  display: flex;
+}
+.upload-demo >>> .el-upload-list--picture-card .el-upload-list__item {
+  height: 120px;
+  width: 120px;
+}
+.upload-demo >>> .el-upload--picture-card {
+  height: 120px;
+  width: 120px;
+  line-height: 120px;
+}
+.dateRange >>> .el-range-input {
+  font-weight: bold;
+  color: #080808;
+}
+.calendar >>> .fc-header-toolbar {
+  margin-bottom: 5px;
+}
+.calendar >>> .borderGreen {
+  border-left: 5px solid #44bb08 !important;
+  border-radius: 0;
+  border: none;
+  white-space: normal;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-  width: 0;
+  span {
+    color: #000;
+    font-weight: bold;
+  }
 }
-.calendar-view .tool-bar .today-label {
-  align-items: center;
-  color: #3370ff;
-  cursor: default;
-  display: flex;
-  flex: 1;
-  font-family: DINAlternate-Bold,PingFangSC-Semibold,Microsoft Yahei,Myriad Pro,Hiragino Sans GB,sans-serif;
-  font-size: 18px;
-  font-weight: 600;
-  justify-content: flex-start;
-  margin-right: 10px;
+.calendar >>> .borderOrange {
+  border-left: 5px solid #fe9b02 !important;
+  border-radius: 0;
+  border: none;
+  white-space: normal;
+  overflow: hidden;
+  span {
+    color: #000;
+    font-weight: bold;
+  }
+}
+.calendar >>> .borderOrigin {
+  border-radius: 0;
+  border: none;
+  white-space: normal;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-  width: 0;
+  max-height: 150px;
+  span {
+    color: #000;
+    font-weight: bold;
+  }
 }
-.calendar-view .tool-bar .nav-wrapper {
-  align-items: center;
-  display: flex;
-  flex: none;
+.calendar >>> .fc-event-title {
+  font-weight: bold;
+  color: #000;
+  overflow: hidden;
 }
-.mode-section {
-  align-items: center;
-  display: flex;
-  height: 30px;
-  justify-content: center;
-  margin-right: 20px;
-  padding: 0 2px;
+.calendar >>> .fc-event-time {
+  font-weight: bold;
+  color: #000;
 }
-.mode-section .label-btn {
-  align-items: center;
-  border-radius: 3px;
+.calendar >>> .fc-daygrid-event-dot {
+  border: none;
+}
+.popover {
+  .el-popover {
+    max-height: 350px;
+  }
+}
+.popover_title {
+  font-weight: bold;
+  margin-bottom: 3px;
+}
+.popover_content {
+  color: #000;
+  font-size: 13px;
+}
+.popoverShowImg {
+  width: auto;
   cursor: pointer;
-  display: flex;
-  flex: auto;
+  >>> .el-image__inner {
+    max-height: 200px;
+  }
+}
+.link {
+  color: #000;
   font-size: 12px;
-  justify-content: center;
-}
-.mode-section .normal-mode {
-  height: 24px;
-  margin: 3px 1px;
-  width: 56px;
-}
-.mode-section .label-btn.selected {
-  background-color: #f0f4ff;
-  color: #3370ff;
-}
-.mode-section .meeting-mode {
-  height: 24px;
-  margin: 3px 1px 3px 4px;
-  position: relative;
-  width: 84px;
-}
-._pp-header-avatar-box ._pp-header-avatar {
-  border-radius: 50%;
-  height: 32px;
-  position: relative;
-  width: 32px;
-}
-._pp-header-avatar-box ._pp-header-avatar img {
-  border-radius: 50%;
-  height: 100%;
-  left: 0;
-  -o-object-fit: cover;
-  object-fit: cover;
-  position: absolute;
-  top: 0;
-  width: 100%;
+  font-weight: bold;
+  margin-top: 2px;
+  & :hove {
+    color: #66b1ff;
+  }
 }
 .fc_btns {
-  border: 0px solid #DCDFE6;
-  padding: 8px 6px;
+  padding: 10px 12px;
 }
-.menu-list {
-  margin-right: 20px;
-  cursor: pointer;
+.el-icon-search {
+  line-height: 2.5;
+  margin-right: 8px;
 }
-.other-selected {
-  color: #FFF;
-  background-color: #409EFF;
-  border-color: #409EFF;
+.fc-right {
+  display: flex;
+  flex: 1.5;
+  justify-content: flex-end;
 }
-.today-selected {
-  color: #FFF;
-  background-color: #67C23A;
-  border-color: #67C23A;
+.tip-content {
+  line-height: 2.2;
+  margin-right: 4px;
+  font-weight: 600;
 }
-
-.fc_btns_right {
-  color: #409EFF;
-  background: #ecf5ff;
-  border-color: #b3d8ff;
+.title {
+  margin: 0px 5px;
+  line-height: 1.6;
 }
-.fc_btns_right_today {
-  color: #67C23A;
-  background: #f0f9eb;
-  border-color: #c2e7b0;
+.calendar_matters {
+  width: 100%;
 }
-::v-deep .fc-scrollgrid-shrink-cushion  {
-  box-sizing: border-box;
-  color: #8f959e;
-  font-size: 10px;
-  position: relative;
+.calendar >>> .el-popover__reference {
+  display: grid;
+  max-height: 150px;
+  overflow: auto;
 }
-::v-deep .fc-timegrid-slot-minor {
-  border-top:none
+</style>
+<!-- 样式2 -->
+<style>
+.el-popover__reference::-webkit-scrollbar {
+  /*滚动条整体样式*/
+  width: 8px; /*高宽分别对应横竖滚动条的尺寸*/
+  height: 1px;
 }
-::v-deep .fc-timegrid-slot-label.fc-scrollgrid-shrink {
-  border-top:none
+.el-popover__reference::-webkit-scrollbar-thumb {
+  /*滚动条里面小方块*/
+  border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+  background: #535353;
 }
-/*::v-deep .fc-timegrid-slot.fc-timegrid-slot-label.fc-timegrid-slot-minor {*/
-/*  visibility: hidden;*/
-/*}*/
-::v-deep .fc-timegrid-slot-label {
-  border-bottom:none;
-  width: 60px;
-  padding-right: 4px;
+.el-popover__reference::-webkit-scrollbar-track {
+  /*滚动条里面轨道*/
+  -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+  background: #ededed;
 }
-/*::v-deep .fc-scrollgrid-shrink {*/
-/*  border-top:none;*/
-/*}*/
-/*::v-deep .fc-timegrid-slot-label.fc-scrollgrid-shrink {*/
-/*}*/
-::v-deep .fc table {
-  border-collapse: collapse;
-  border-spacing: 0;
-  font-size: 0.1em;
+.popover .el-popover__title {
+  font-weight: bold;
+  margin-bottom: 5px;
+  border-bottom: solid 1px;
+  padding: 2px;
 }
-::v-deep .fc-scrollgrid-sync-inner{
-  height: 40px;
+@media only screen and (max-width: 767px) {
+  .fc-toolbar {
+    flex-direction: column;
+  }
+  .fc-left {
+    flex: 1 !important;
+  }
+  .tips {
+    flex: 1 !important;
+    justify-content: center;
+    margin-bottom: 5px;
+  }
+  .fc-center {
+    flex: 1 !important;
+    margin: 5px 0px;
+  }
+  .fc-right {
+    flex: 1;
+    justify-content: center !important;
+    margin-bottom: 5px;
+  }
+  .tip-content {
+    line-height: 1 !important;
+    margin-right: 4px;
+    font-weight: 600;
+  }
+  .title {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.9 !important;
+  }
+  .fc-list-table {
+    word-break: break-all;
+    overflow: auto;
+  }
+  .fc-list-event-title {
+    overflow: auto;
+  }
+  .el-dialog {
+    width: 90%;
+  }
+  .dateRange {
+    overflow: auto;
+  }
 }
-::v-deep .fc .fc-col-header-cell-cushion {
-  margin-top: 7px;
-  color: dodgerblue;
-  font-size: 17px;
-  display: inline-block;
-  padding: 2px 4px;
-}
-/*::v-deep #calendar-tab > div > div > div.calendar-view > div.el-col.el-col-24.el-col-xs-24.el-col-md-24 > div:nth-child(1) > div > div > div > table > tbody > tr:nth-child(3) > td > div > div > div > div.fc-timegrid-slots > table > tbody > tr:nth-child(3) > td.fc-timegrid-slot.fc-timegrid-slot-label.fc-scrollgrid-shrink {*/
-/*  visibility: hidden;*/
-/*}*/
 </style>

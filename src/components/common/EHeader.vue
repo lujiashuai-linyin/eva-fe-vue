@@ -10,10 +10,10 @@
           </li>
         </ul>
 
-        <div v-if="token" class="login-bar full-right">
+        <div v-if="this.$store.state.name" class="login-bar full-right">
           <div class="shop-cart full-left">
             <div><img src="/static/image/备忘录.png" alt=""></div>
-            <div><router-link to="/">日程</router-link></div>
+            <div><router-link to="/calendar">日程</router-link></div>
           </div>
           <div class="shop-cart full-left">
             <div><img src="/static/image/日志.png" alt=""></div>
@@ -57,13 +57,10 @@
 </template>
 
 <script>
-import cookie from "js-cookie";
-
 export default {
   data () {
     return {
       search_content: '',
-      token: '',
       nav_id: 0,
       nav_list: [
         {
@@ -113,9 +110,6 @@ export default {
     this.check_user_login()
   },
   methods: {
-    check_user_login() {
-      this.token = cookie.get('x-token')
-    },
     Goto(router) {
       this.$router.push(router)
     },

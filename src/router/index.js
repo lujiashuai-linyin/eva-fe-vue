@@ -6,7 +6,7 @@ import Book from '@/views/Book'
 import Login from '@/views/Login'
 import Register from '@/views/Register'
 import Calendar from '@/views/Calendar'
-import Week from '@/views/Calendar/Week'
+import Demo from '@/views/Demo'
 
 Vue.use(VueRouter)
 
@@ -32,16 +32,14 @@ const routes = [
   },
   {
     path: '/calendar',
-    redirect: '/calendar/week',
-    name: 'calendar',
+    name: 'Calendar',
     component: Calendar,
-    children: [
-      {
-        path: "/calendar/week",
-        meta: {title: '日程'},
-        component: Week
-      },
-    ]
+  },
+  {
+    path: '/demo',
+    name: 'Demo',
+    meta: {title: 'Demo'},
+    component: Demo,
   },
   {
     path: '/login',
