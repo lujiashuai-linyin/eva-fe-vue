@@ -19,11 +19,13 @@ const routes = [
     children: [
       {
         path: "home",
+        name: 'home1',
         meta: {title: '首页'},
         component: Home
       },
       {
         path: "book",
+        name: "book",
         meta: {title: '书云'},
         component: Book
       },
@@ -32,12 +34,12 @@ const routes = [
   },
   {
     path: '/calendar',
-    name: 'Calendar',
+    name: 'calendar',
     component: Calendar,
   },
   {
     path: '/demo',
-    name: 'Demo',
+    name: 'demo',
     meta: {title: 'Demo'},
     component: Demo,
   },

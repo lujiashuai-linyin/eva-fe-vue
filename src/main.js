@@ -41,6 +41,7 @@ instance.interceptors.response.use(response => {
 
 instance.defaults.withCredentials = false; // false表示阻止ajax附带cookie
 Vue.prototype.$axios = instance; // 把对象挂载vue中
+import "./permission";
 
 
 // 导入极验的sdk

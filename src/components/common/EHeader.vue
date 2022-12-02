@@ -57,6 +57,7 @@
 </template>
 
 <script>
+import cookie from 'js-cookie';
 export default {
   data () {
     return {
@@ -107,7 +108,6 @@ export default {
     }
   },
   created () {
-    this.check_user_login()
   },
   methods: {
     Goto(router) {
@@ -116,6 +116,7 @@ export default {
     logoutHander() {
       console.log("注销")
       cookie.remove("x-token")
+      cookie.remove("username")
       this.$router.push("/login")
     }
   }

@@ -63,6 +63,7 @@ export default {
           // let expires =  response.data.data.expiresAt
           // console.log("expiresAt", expires)
           cookie.set("x-token", response.data.data.token, {domain:'localhost', expires: 7})
+          cookie.set("username", response.data.data.username, {domain:'localhost', expires: 7})
         }
         // 页面跳转
         let self = this
@@ -126,7 +127,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .login-page{
   width: 100%;
@@ -257,4 +257,5 @@ export default {
   text-decoration: none;
   color: #000;
 }
+
 </style>

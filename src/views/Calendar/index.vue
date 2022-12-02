@@ -2,8 +2,18 @@
   <div class="app-container" id="calendar-tab">
     <div style="height: 100%; width: 100%;">
       <div class="default-page">
-        <div class="tool-panel" style="width: 256px;">
-          tool-panel
+          <!-- 日历左边栏 -->
+        <div class="tool-panel" :style="!show_tool_panel?'display: none;': 'width: 256px;'">
+          <div class="con">
+            <div class="now-data-myself">
+              <div class="now-data-myself-time">{{ date }}</div>
+              <div class="now-data-myself-week">{{ week }}</div>
+            </div>
+            <Calendar
+                v-on:choseDay="clickDay"
+                ref="CalendarTool"
+            ></Calendar>
+          </div>
         </div>
         <div class="calendar-view">
           <div style="width: 100%;">
@@ -17,6 +27,7 @@
                       icon="el-icon-arrow-left"
                       @click="getPrev"
                       class="fc_btns"
+                      style="margin-left: 3px"
                   ></el-button>
                   <el-button
                       icon="el-icon-arrow-right"
@@ -46,7 +57,7 @@
                     >月</el-button
                     >
                     <el-button
-                        @click="week"
+                        @click="GoWeek"
                         type="primary"
                         size="medium"
                         :class="current_label==='week'?'other-selected':'fc_btns_right'"
@@ -97,153 +108,152 @@
                 :visible.sync="dialogVisible"
                 :popperAppendToBody="false"
                 @close="cancel"
-                v-dialogDrag
-                :close-on-click-modal="false"
+                width="492px"
+                :close-on-click-modal="true"
                 class="calendar_matters"
             >
               <div slot="title" class="header-title" :style="{ color: 'black' }">
-                <i class="el-icon-edit"></i><span> &nbsp;事件</span>
+                <i class="el-icon-edit"></i><span> &nbsp;日程</span>
               </div>
               <el-form ref="form" :model="form" label-width="80px">
                 <el-row>
-                  <el-col :span="12" :xs="24">
-                    <el-form-item label="事件时间">
-                      <div class="dateRange">
-                        <el-date-picker
-                            v-model="dateRange"
-                            type="datetimerange"
-                            range-separator="至"
-                            start-placeholder="开始日期"
-                            end-placeholder="结束日期"
-                        >
-                        </el-date-picker>
+                  <div class="des-area">
+                    <svg class="larkc-svg-icon icon" aria-hidden="true" viewBox="0 0 1024 1024"><path d="M170.666667 170.666667v682.666666h682.666666V170.666667H170.666667zM128 85.333333h768a42.666667 42.666667 0 0 1 42.666667 42.666667v768a42.666667 42.666667 0 0 1-42.666667 42.666667H128a42.666667 42.666667 0 0 1-42.666667-42.666667V128a42.666667 42.666667 0 0 1 42.666667-42.666667z m149.333333 170.666667h298.666667a21.333333 21.333333 0 0 1 21.333333 21.333333v42.666667a21.333333 21.333333 0 0 1-21.333333 21.333333H277.333333a21.333333 21.333333 0 0 1-21.333333-21.333333v-42.666667a21.333333 21.333333 0 0 1 21.333333-21.333333z"></path></svg>
+                    <input class="vmInput" v-model="form.title" maxlength="200" placeholder="添加主题">
+                  </div>
+                </el-row>
+                <el-row>
+                  <div class="des-area">
+                    <svg class="larkc-svg-icon icon" aria-hidden="true" viewBox="0 0 1024 1024"><path d="M554.666667 469.333333h149.333333a21.333333 21.333333 0 0 1 21.333333 21.333334v42.666666a21.333333 21.333333 0 0 1-21.333333 21.333334H490.666667a21.269333 21.269333 0 0 1-21.333334-21.333334V320a21.333333 21.333333 0 0 1 21.333334-21.333333h42.666666a21.333333 21.333333 0 0 1 21.333334 21.333333v149.333333z m-42.666667 426.666667c212.074667 0 384-171.925333 384-384S724.074667 128 512 128 128 299.925333 128 512s171.925333 384 384 384z m0 85.333333C252.8 981.333333 42.666667 771.2 42.666667 512S252.8 42.666667 512 42.666667s469.333333 210.133333 469.333333 469.333333-210.133333 469.333333-469.333333 469.333333z"></path></svg>
+                    <div class="dateRange">
+                      <el-date-picker
+                          v-model="dateRange"
+                          type="datetimerange"
+                          prefix-icon="a"
+                          range-separator="至"
+                          size="small"
+                          start-placeholder="开始日期"
+                          end-placeholder="结束日期"
+                      >
+                      </el-date-picker>
+                    </div>
+                  </div>
+                </el-row>
+                <el-row>
+                    <div class="des-area">
+                      <div class="record-status-type">
+                        <svg t="1669203395674" class="icon" style="margin-left: -4px;margin-right: -5px" viewBox="0 0 1024 1024" width="23" height="23"><path d="M516.8 441.3h324.6c11.3 0 20.5 9.2 20.5 20.5s-9.2 20.5-20.5 20.5H516.8c-11.3 0-20.5-9.2-20.5-20.5s9.2-20.5 20.5-20.5zM516.8 605.1h324.6c11.3 0 20.5 9.2 20.5 20.5s-9.2 20.5-20.5 20.5H516.8c-11.3 0-20.5-9.2-20.5-20.5 0-11.4 9.2-20.5 20.5-20.5zM516.8 768.8h324.6c11.3 0 20.5 9.2 20.5 20.5s-9.2 20.5-20.5 20.5H516.8c-11.3 0-20.5-9.2-20.5-20.5s9.2-20.5 20.5-20.5z" p-id="2555" fill="#707070"></path><path d="M411.3 504.3H206.6c-12.2 0-22-9.9-22-22V277.6c0-12.1 9.8-22 22-22h204.7c12.2 0 22 9.9 22 22v204.6c0 12.2-9.8 22.1-22 22.1z m-182.7-44h160.7V299.6H228.6v160.7zM411.3 831.7H206.6c-12.2 0-22-9.9-22-22V605.1c0-12.1 9.8-22 22-22h204.7c12.2 0 22 9.9 22 22v204.7c0 12.1-9.8 21.9-22 21.9z m-182.7-44h160.7V627.1H228.6v160.6z" p-id="2556" fill="#707070"></path><path d="M516.8 277.6h324.6c11.3 0 20.5 9.2 20.5 20.5s-9.2 20.5-20.5 20.5H516.8c-11.3 0-20.5-9.2-20.5-20.5s9.2-20.5 20.5-20.5z" p-id="2557" fill="#707070"></path></svg>
+                        <el-select v-model="form.record_type" placeholder="日程类型">
+                          <el-option
+                              v-for="item in record_type_list"
+                              :key="item.value"
+                              :label="item.label"
+                              :value="item.value">
+                          </el-option>
+                        </el-select>
                       </div>
-                    </el-form-item>
-                  </el-col>
-                  <el-col :span="12"> </el-col>
+                      <div class="record-status-type">
+                        <svg class="larkc-svg-icon icon" aria-hidden="true" viewBox="0 0 1024 1024"><path d="M426.666667 117.76V85.333333a21.333333 21.333333 0 0 1 21.333333-21.333333h128a21.333333 21.333333 0 0 1 21.333333 21.333333v32.426667c147.2 39.125333 256 177.066667 256 341.248V704h64a21.333333 21.333333 0 0 1 21.333334 21.333333v42.666667a21.333333 21.333333 0 0 1-21.333334 21.333333H106.666667a21.333333 21.333333 0 0 1-21.333334-21.333333v-42.666667a21.333333 21.333333 0 0 1 21.333334-21.333333h64V459.008C170.666667 294.826667 279.466667 156.885333 426.666667 117.76zM256 704h512V459.136C768 311.594667 653.376 192 512 192s-256 119.594667-256 267.136V704z m149.333333 149.333333h213.333334a21.333333 21.333333 0 0 1 21.333333 21.333334v42.666666a21.333333 21.333333 0 0 1-21.333333 21.333334H405.333333a21.333333 21.333333 0 0 1-21.333333-21.333334v-42.666666a21.333333 21.333333 0 0 1 21.333333-21.333334z"></path></svg>
+                        <el-radio v-model="form.alert" :label=true style="width: 42px;margin-left: 0px;" class="record-status" size="small">提醒</el-radio>
+                        <el-radio v-model="form.alert" :label=false style="width: 80px;margin-left: 0px;" class="record-status" size="small">不提醒</el-radio>
+                      </div>
+                    </div>
                 </el-row>
                 <el-row>
-                  <el-col :span="24"
-                  ><el-form-item label="具体事项">
-                    <el-input
-                        v-model="form.remark"
-                        type="textarea"
-                        class="calendar_details"
-                    ></el-input> </el-form-item
-                  ></el-col>
+                    <div class="des-area">
+                      <svg class="larkc-svg-icon icon" aria-hidden="true" viewBox="0 0 1024 1024"><path d="M213.333333 128v768h597.333334V128H213.333333zM170.666667 42.666667h682.666666c23.573333 0 42.666667 20.010667 42.666667 44.693333v849.28C896 961.322667 876.906667 981.333333 853.333333 981.333333H170.666667c-23.573333 0-42.666667-20.010667-42.666667-44.693333V87.36C128 62.677333 147.093333 42.666667 170.666667 42.666667z m149.333333 256h128a21.333333 21.333333 0 0 1 21.333333 21.333333v42.666667a21.333333 21.333333 0 0 1-21.333333 21.333333h-128a21.333333 21.333333 0 0 1-21.333333-21.333333v-42.666667a21.333333 21.333333 0 0 1 21.333333-21.333333z m0 170.666666h384a21.333333 21.333333 0 0 1 21.333333 21.333334v42.666666a21.333333 21.333333 0 0 1-21.333333 21.333334H320a21.333333 21.333333 0 0 1-21.333333-21.333334v-42.666666a21.333333 21.333333 0 0 1 21.333333-21.333334z m0 170.666667h384a21.333333 21.333333 0 0 1 21.333333 21.333333v42.666667a21.333333 21.333333 0 0 1-21.333333 21.333333H320a21.333333 21.333333 0 0 1-21.333333-21.333333v-42.666667a21.333333 21.333333 0 0 1 21.333333-21.333333z"></path></svg>
+                      <input class="vmInput" v-model="form.content" placeholder="添加描述">
+                    </div>
                 </el-row>
                 <el-row>
-                  <el-col :span="12" :xs="24"
-                  ><el-form-item label="提醒类别" prop="deptId">
-                    <treeselect
-                        v-model="form.category"
-                        :options="Options"
-                        :props="defaultProps"
-                        :show-count="true"
-                        placeholder="请选择类型"
-                        @select="categorySelected"
-                    /> </el-form-item
-                  ></el-col>
-                  <el-col :span="12" :xs="24"
-                  ><el-form-item
-                      v-if="form.userId == undefined"
-                      label="记录人"
-                      prop="userName"
-                  >
-                    <el-input
-                        v-model="form.userName"
-                        maxlength="30"
-                        disabled
-                        class="userName"
-                    /> </el-form-item
-                  ></el-col>
-                </el-row>
-
-                <el-row>
-                  <el-col :span="12"> </el-col>
-                  <el-col :span="12" :xs="24">
-                    <el-form-item label="状态">
-                      <el-radio-group v-model="form.isDone">
-                        <el-radio label="0">已完成</el-radio>
-                        <el-radio label="1">未确认</el-radio>
-                      </el-radio-group>
-                    </el-form-item>
-                  </el-col>
-                </el-row>
-                <el-row>
-                  <el-col :span="18" :xs="24">
-                    <el-form-item label="附件" class="attachment" prop="address">
-                      <el-upload
-                          action="#"
-                          :show-file-list="false"
-                          :auto-upload="false"
-                          :on-change="address_beforeupload"
-                      >
-                        <div>
-                          <el-button
-                              type="primary"
-                              icon="el-icon-folder-opened"
-                          ></el-button>
+                  <div class="label-container">
+                    <svg class="larkc-svg-icon icon" aria-hidden="true"  viewBox="0 0 1024 1024"><path d="M768 213.333333v42.666667a21.333333 21.333333 0 0 1-21.333333 21.333333h-42.666667a21.333333 21.333333 0 0 1-21.333333-21.333333v-42.666667H341.333333v42.666667a21.333333 21.333333 0 0 1-21.333333 21.333333h-42.666667a21.333333 21.333333 0 0 1-21.333333-21.333333v-42.666667H170.666667v213.333334h682.666666V213.333333h-85.333333z m0-85.333333h128c23.573333 0 42.666667 20.16 42.666667 45.034667V893.653333C938.666667 918.506667 919.573333 938.666667 896 938.666667H128c-23.573333 0-42.666667-20.16-42.666667-45.034667V173.013333C85.333333 148.16 104.426667 128 128 128h128V85.333333a21.333333 21.333333 0 0 1 21.333333-21.333333h42.666667a21.333333 21.333333 0 0 1 21.333333 21.333333v42.666667h341.333334V85.333333a21.333333 21.333333 0 0 1 21.333333-21.333333h42.666667a21.333333 21.333333 0 0 1 21.333333 21.333333v42.666667zM170.666667 512v341.333333h682.666666V512H170.666667z"></path></svg>
+                    <div class="calendar-select-wrapper">
+                      <div class="_trigger ">
+                      <div tabindex="0" class="_selection showTriangle calendar-select fastCreateEvent--calendarSelect" data-selected-value="">
+                        <div class="calendar-dom">
+                          <div class="color" style="background-color: rgb(78, 131, 253);"></div>
+                          <div class="summary">{{ username }}</div>
                         </div>
-                      </el-upload>
-                      <el-input
-                          v-model="form.address"
-                          clearable
-                      ></el-input></el-form-item
-                    ></el-col>
+                      </div>
+                      </div>
+                    </div>
+                  </div>
                 </el-row>
-                <el-row>
-                  <el-col :span="24" :xs="24">
-                    <el-form-item label="相关图片" prop="address">
-                      <el-upload
-                          ref="uploadFile"
-                          class="upload-demo"
-                          action="#"
-                          :auto-upload="false"
-                          :show-file-list="true"
-                          :on-change="beforeupload"
-                          list-type="picture-card"
-                          :file-list="filelist"
-                          multiple
-                      >
-                        <i slot="default" class="el-icon-plus"></i>
-                        <div slot="file" slot-scope="{ file }">
-                          <img
-                              class="el-upload-list__item-thumbnail"
-                              :src="file.url"
-                              alt=""
-                          />
-                          <span class="el-upload-list__item-actions">
-                        <span
-                            class="el-upload-list__item-preview"
-                            @click="handlePictureCardPreview(file)"
-                        >
-                          <i class="el-icon-zoom-in"></i>
-                        </span>
-                        <span
-                            v-if="!disabled"
-                            class="el-upload-list__item-delete"
-                            @click="handleDownload(file)"
-                        >
-                          <i class="el-icon-download"></i>
-                        </span>
-                        <span
-                            v-if="!disabled"
-                            class="el-upload-list__item-delete"
-                            @click="handleRemove(file)"
-                        >
-                          <i class="el-icon-delete"></i>
-                        </span>
-                      </span>
-                        </div>
-                      </el-upload>
-                    </el-form-item>
-                  </el-col>
-                </el-row>
+<!--                  <el-row>-->
+<!--                    <el-col :span="18" :xs="24">-->
+<!--                      <el-form-item label="附件" class="attachment" prop="address">-->
+<!--                        <el-upload-->
+<!--                            action="#"-->
+<!--                            :show-file-list="false"-->
+<!--                            :auto-upload="false"-->
+<!--                            :on-change="address_beforeupload"-->
+<!--                        >-->
+<!--                          <div>-->
+<!--                            <el-button-->
+<!--                                type="primary"-->
+<!--                                icon="el-icon-folder-opened"-->
+<!--                            ></el-button>-->
+<!--                          </div>-->
+<!--                        </el-upload>-->
+<!--                        <el-input-->
+<!--                            v-model="form.address"-->
+<!--                            clearable-->
+<!--                        ></el-input></el-form-item-->
+<!--                      ></el-col>-->
+<!--                  </el-row>-->
+<!--                  <el-row>-->
+<!--                    <el-col :span="24" :xs="24">-->
+<!--                      <el-form-item label="相关图片" prop="address">-->
+<!--                        <el-upload-->
+<!--                            ref="uploadFile"-->
+<!--                            class="upload-demo"-->
+<!--                            action="#"-->
+<!--                            :auto-upload="false"-->
+<!--                            :show-file-list="true"-->
+<!--                            :on-change="beforeupload"-->
+<!--                            list-type="picture-card"-->
+<!--                            :file-list="filelist"-->
+<!--                            multiple-->
+<!--                        >-->
+<!--                          <i slot="default" class="el-icon-plus"></i>-->
+<!--                          <div slot="file" slot-scope="{ file }">-->
+<!--                            <img-->
+<!--                                class="el-upload-list__item-thumbnail"-->
+<!--                                :src="file.url"-->
+<!--                                alt=""-->
+<!--                            />-->
+<!--                            <span class="el-upload-list__item-actions">-->
+<!--                          <span-->
+<!--                              class="el-upload-list__item-preview"-->
+<!--                              @click="handlePictureCardPreview(file)"-->
+<!--                          >-->
+<!--                            <i class="el-icon-zoom-in"></i>-->
+<!--                          </span>-->
+<!--                          <span-->
+<!--                              v-if="!disabled"-->
+<!--                              class="el-upload-list__item-delete"-->
+<!--                              @click="handleDownload(file)"-->
+<!--                          >-->
+<!--                            <i class="el-icon-download"></i>-->
+<!--                          </span>-->
+<!--                          <span-->
+<!--                              v-if="!disabled"-->
+<!--                              class="el-upload-list__item-delete"-->
+<!--                              @click="handleRemove(file)"-->
+<!--                          >-->
+<!--                            <i class="el-icon-delete"></i>-->
+<!--                          </span>-->
+<!--                        </span>-->
+<!--                          </div>-->
+<!--                        </el-upload>-->
+<!--                      </el-form-item>-->
+<!--                    </el-col>-->
+<!--                  </el-row>-->
               </el-form>
               <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="submitForm">确 定</el-button>
-                <el-button @click="cancel">取 消</el-button>
+                <el-button @click="()=>{Goto('/')}">更多选项</el-button>
+                <el-button type="primary" @click="submitForm">保存</el-button>
               </div>
             </el-dialog>
             <!-- 图片预览对话框 -->
@@ -255,6 +265,7 @@
             <!--            style="z-index: 3000"-->
             <!--        ></el-image-viewer>-->
           </el-col>
+            <!-- 添加事件 -->
           <div class="add-new-event-btn">
             +
           </div>
@@ -274,16 +285,29 @@ import { auto } from "@popperjs/core";
 import Treeselect from "@riophae/vue-treeselect"; // Treeselect插件
 import "@riophae/vue-treeselect/dist/vue-treeselect.css"; // 若依css设置
 import '@fullcalendar/core/vdom'
+import cookie from 'js-cookie';
+import moment from "moment";
+// import 'vue-datepicker-ui/lib/vuedatepickerui.css';
+// import VueDatepickerUi from 'vue-datepicker-ui';
+import Calendar from 'vue-calendar-component';
 export default {
 // 注册局部组件
   components: {
     FullCalendar,
+    Calendar,
+    // Datepicker: VueDatepickerUi,
     Treeselect,
     "el-image-viewer": () =>
         import("element-ui/packages/image/src/image-viewer"),
   },
   data() {
     return {
+      // 左侧日历
+      date: "",
+      week: "",
+
+      show_tool_panel: true,
+      username: '',
       istoday: false,
       current_label: '',
       triger: '<<收起',
@@ -296,33 +320,25 @@ export default {
         label: "label",
       },
       // 提醒类别设置
-      Options: [
-        {
-          id: "工作类别",
-          pid: 0,
-          label: "工作类别",
-          children: [],
-        },
-        {
-          id: "生活类别",
-          pid: 0,
-          label: "生活类别",
-          children: [],
-        },
-        {
-          id: "其他类别",
-          pid: 0,
-          label: "其他类别",
-          children: [],
-        },
-        {
-          id: "",
-          pid: 0,
-          label: "无",
-          children: [],
-        },
-      ],
-
+      record_type_list: [{
+        value: '会议',
+        label: '会议'
+      }, {
+        value: '饮食',
+        label: '饮食'
+      }, {
+        value: '娱乐',
+        label: '娱乐'
+      }, {
+        value: '学习',
+        label: '学习'
+      }, {
+        value: '工作',
+        label: '工作'
+      }, {
+        value: '日常',
+        label: '日常'
+      }],
       // 表单是否显示
       dialogVisible: false,
       // 表单标题栏
@@ -331,8 +347,16 @@ export default {
       form_edited_state: "",
       // 表单内容设置项
       form: {
-        remark: undefined,
-        isDone: undefined,
+        id: 0,
+        isAllDay: false,
+        record_type: "日常",
+        title: undefined,
+        content: undefined,
+        repeat: "不重复",//每天，每周，每月，每年
+        alert: false,//是否提醒
+        pre_alert_time: undefined,
+        user_status: undefined,
+        place: undefined,
         img: "",
         address: "",
       },
@@ -374,7 +398,7 @@ export default {
         slotDuration: '00:15:00', // 在agenda的视图中, 两个时间之间的间隔(分钟)
         slotLabelInterval: "01:00",
         scrollTime: "09:00:00",
-        unselectAuto: true,
+        unselectAuto: false,
         defaultEventMinutes: 30,// 事件默认的时间执行长度，如果事件对象没有指定执行多长时间，则默认执行1h
         // scrollTime: '09:15:00',
         themeSystem: "bootstrap", // 主题色(本地测试未能生效)
@@ -525,6 +549,14 @@ export default {
     this.calendarApi = this.$refs.fullCalendar.getApi();
     console.log("calendarApi:", this.calendarApi)
     this.title = this.calendarApi.view.title;
+    this.username = cookie.get("username")
+  },
+  created() {
+    let now = new Date();
+    this.date = now.getDate();//得到日期
+    let day = now.getDay();//得到周几
+    let arr_week = new Array("星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六");
+    this.week = arr_week[day];
   },
   watch: {
     search_input: {
@@ -538,14 +570,48 @@ export default {
     },
   },
   methods: {
+    // 左侧日历
+    clickDay(data) {
+      //选中某天
+      let now = new Date();
+      if (moment.utc(data).toDate().toLocaleDateString() !== now.toLocaleDateString()) {
+        this.istoday = false;
+      }
+      let calendarApi = this.$refs.fullCalendar.getApi();
+      let focusDay = moment.utc(data).toDate()
+      calendarApi.gotoDate(focusDay)
+      this.title = this.calendarApi.view.title;
+    },
+    // changeDate(data) {
+    //   console.log(data); //左右点击切换月份
+    //
+    // },
+    // clickToday(data) {
+    //   console.log(data); // 跳到了本月
+    // },
+
+
+
+    Goto(path) {
+      this.$router.push(path)
+    },
     // 关闭左侧工具栏
     closeToolPanel() {
-
+      this.show_tool_panel = !this.show_tool_panel;
+      if (this.triger === "<<收起") {
+        this.triger = "展开>>"
+      } else {
+        this.triger = "<<收起"
+      }
     },
     // 将当前时间移至今日事件
     today() {
       this.istoday = true;
       this.getToday();
+      let now = new Date();
+      let currentDay = moment(now).format("YYYY-MM-DD")
+      console.log(currentDay)
+      this.$refs.CalendarTool.ChoseMonth(currentDay)
     },
     // 月视图
     month() {
@@ -554,7 +620,7 @@ export default {
       this.title = this.calendarApi.view.title;
     },
     // 周视图
-    week() {
+    GoWeek() {
       this.current_label = 'week';
       this.calendarApi.changeView("timeGridWeek");
       this.title = this.calendarApi.view.title;
@@ -653,7 +719,7 @@ export default {
     // 今天
     getToday() {
       let calendarApi = this.$refs.fullCalendar.getApi();
-      calendarApi.today();
+      calendarApi.today()
       this.handleTime(calendarApi.currentData.dateProfile.activeRange);
       this.title = this.calendarApi.view.title;
       this.search_input = "";
@@ -680,123 +746,135 @@ export default {
         startStr: activeRange.start,
         endStr: activeRange.end,
       };
-      this.getCalendarList();
+      this.getCalendarList(result);
     },
     // 获取列表信息
     getCalendarList(result) {
       // 以当前时间插入数据
-      // let _this = this;
       // 注意，请求的数据是数据库所有数据即可，不用考虑当前显示的时间范围，Fullcalendar会自动只显示当前日期范围的事件
-      //   _this
-      //       .get("/calendar/getCalendarList", "")
-      //       .then((res) => {
-      //         _this.calendarOptions.events = [];
-      //         res.data.data.forEach((item) => {
-      //           var data = {
-      //             id: item[0],
-      //             title: item[1],
-      //             start: item[2],
-      //             end: item[3],
-      //             allDay: item[4],
-      //             className: item[5] == true ? "borderGreen" : "borderOrange",
-      //             // 非标准字段:除上述字段外，您还可以在每个事件对象中包含自己的非标准字段。FullCalendar不会修改或删除这些字段。例如，开发人员通常包括描述在回调中使用的字段，如事件呈现挂钩. 任何非标准属性都将移动到extendedProps哈希期间事件解析.
-      //             extendedProps: {
-      //               isDone: item[5],
-      //               img: item[6],
-      //               address: item[7],
-      //               type: item[8],
-      //             },
-      //             others: "该字段值会被自动归类到extendedProps里面",
-      //             backgroundColor:
-      //                 (item[4] == true ? "all_Day" : "other") != "all_Day"
-      //                     ? item[5] == true
-      //                         ? "#c2fccd"
-      //                         : "#FFECDC"
-      //                     : "#66b1ff",
-      //             editable: true, // 是否可以进行（拖动、缩放）修改
-      //           };
-      //           _this.calendarOptions.events.push(data);
-      //         });
-      //       })
-      //       .catch((error) => {
-      //         this.$message.error(error);
-      //       });
+      this.$axios.get(`/api/v1/private/calendar/get_record_list`, {})
+            .then(response => {
+              console.log(response.data)
+              this.calendarOptions.events = [];
+              response.data.data.forEach((item) => {
+                let is_Done = moment.utc(item.end_time).toDate() < new Date();
+                let data = {
+                  id: item.id,
+                  title: item.title,
+                  start: item.start_time,
+                  end: item.end_time,
+                  allDay: item.is_all_day,
+                  className: is_Done? "borderGreen": "borderOrange",// 是否完成
+                  // 非标准字段:除上述字段外，您还可以在每个事件对象中包含自己的非标准字段。FullCalendar不会修改或删除这些字段。例如，开发人员通常包括描述在回调中使用的字段，如事件呈现挂钩. 任何非标准属性都将移动到extendedProps哈希期间事件解析.
+                  extendedProps: {
+                    isDone: is_Done,
+                    img: item.img,
+                    address: item.address,
+                    type: item.type,
+                  },
+                  others: "该字段值会被自动归类到extendedProps里面",
+                  textColor: "#2c3e50",
+                  backgroundColor:
+                      (item.is_all_day === true ? "all_Day" : "other") !== "all_Day"
+                          ? is_Done === true
+                              ? "rgba(159,250,144,0.73)"
+                              : "#FFECDC"
+                          : "#66b1ff",
+                  editable: true, // 是否可以进行（拖动、缩放）修改
+                };
+                this.calendarOptions.events.push(data);
+              });
+            })
+            .catch((error) => {
+              this.$message.error(error.response);
+            });
     },
 
     // 选择日期，填写事件
     selectDate: function (arg) {
-      let startTime = this.dateFormat("YYYY-mm-dd HH:MM", arg.start);
-      let endTime = this.dateFormat("YYYY-mm-dd HH:MM", arg.end);
+      let startTime = this.dateFormat('YYYY-mm-dd:HH:MM:SS', arg.start);
+      let endTime = this.dateFormat('YYYY-mm-dd:HH:MM:SS', arg.end);
+      console.log(startTime, endTime)
       this.dialogVisible = true;
       this.form_edited_state = "add";
       this.dateRange = [startTime, endTime]; // 设置当前记录事件的选择的时间段
-      let info = JSON.parse(localStorage.getItem("userInfo")); // 获取当前记录人信息
-      this.form.userName = info.username; // 设置记录人
-      this.form.isDone = "1"; // 默认设置为事件未完成状态
       this.form.isAllDay = arg.allDay;
-      let calendarApi = arg.view.calendar;
-      calendarApi.unselect(); // 清除当前日期选择
     },
     // 表单确定按钮，提交事件
     submitForm() {
       let calendarApi = this.$refs.fullCalendar.getApi();
-      var startTime = this.dateFormat("YYYY-mm-dd HH:MM:SS", this.dateRange[0]);
-      var endTime = this.dateFormat("YYYY-mm-dd HH:MM:SS", this.dateRange[1]);
-      if (this.form_edited_state == "add") {
+      calendarApi.unselect(); // 清除当前日期选择
+      var moment = require('moment');
+      var startTime = moment(this.dateRange[0]).toISOString();
+      var endTime = moment(this.dateRange[1]).toISOString();
+      console.log(startTime, endTime)
+      if (this.form_edited_state === "add") {
         // 添加事件的后端数据请求
-        this.get(
-            "/calendar/eventRecord",
-            {
-              isAllDay: this.form.isAllDay,
-              dateRange: JSON.stringify([startTime, endTime]),
-              remark: this.form.remark,
-              type: this.form.type == undefined ? "" : this.form.type,
-              isDone: this.form.isDone == "1" ? false : true,
-              userName: this.form.userName,
-              address: this.form.address == undefined ? "" : this.form.address,
-              img: this.form.img == null ? "" : this.form.img,
-            },
-            ""
-        ).then((res) => {
+        this.$axios.post(`/api/v1/private/calendar/add_record`, {
+          is_all_day: this.form.isAllDay,
+          start_time: startTime,
+          end_time: endTime,
+          record_type: this.form.record_type === undefined ? "日常" : this.form.record_type,
+          title: this.form.title,
+          content: this.form.content,
+          alert: this.form.alert,
+          pre_alert_time: this.form.pre_alert_time === undefined ? "5" : this.form.pre_alert_time.toString(),
+          address: this.form.address === undefined ? "" : this.form.address,
+          user_status: this.form.user_status === undefined ? "忙碌": this.form.user_status,
+          repeat: this.form.repeat,
+          place: this.form.place === undefined ? "" : this.form.place,
+          img: this.form.img == null ? "" : this.form.img,
+        }).then(response => {
           this.$message.success("事件添加成功！");
           this.handleTime(calendarApi.currentData.dateProfile.activeRange);
-        });
+        }).catch(error => {
+          console.log(error.response)
+          this.$message.error("事件添加失败！");
+        })
       } else if (this.form_edited_state === "amend") {
         // 修改事件的后端数据请求
-        this.get(
-            "/calendar/submit",
-            {
-              id: this.form.id,
-              dateRange: JSON.stringify([startTime, endTime]),
-              remark: this.form.remark,
-              type: this.form.type === undefined ? "" : this.form.type,
-              isDone: this.form.isDone === "1" ? false : true,
-              userName: this.form.userName,
-              address: this.form.address === undefined ? "" : this.form.address,
-              img: this.form.img === null ? "" : this.form.img,
-              // type: this.form.category,
-            },
-            ""
-        ).then((res) => {
-          this.$message.success("修改事项成功！");
-          if (this.search_input === "") {
-            this.handleTime(calendarApi.currentData.dateProfile.activeRange);
-          }
-        });
+        this.$axios.post(`/api/v1/private/calendar/update_record`, {
+          id: this.form.id,
+          is_all_day: this.form.isAllDay,
+          start_time: startTime,
+          end_time: endTime,
+          record_type: this.form.record_type === undefined ? "日常" : this.form.record_type,
+          title: this.form.title,
+          content: this.form.content,
+          alert: this.form.alert,
+          pre_alert_time: this.form.pre_alert_time === undefined ? [5] : this.form.pre_alert_time,
+          address: this.form.address === undefined ? "" : this.form.address,
+          user_status: this.form.user_status === undefined ? "忙碌": this.form.user_status,
+          repeat: this.form.repeat,
+          place: this.form.place === undefined ? "" : this.form.place,
+          img: this.form.img == null ? "" : this.form.img,
+        },).then(response => {
+          this.$message.success("事件更新成功！");
+          this.handleTime(calendarApi.currentData.dateProfile.activeRange);
+        }).catch(error => {
+          console.log(error.response)
+          this.$message.error("事件更新失败！");
+        })
       }
       this.dialogVisible = false;
     },
     // 表单取消按钮
     cancel() {
+      let calendarApi = this.$refs.fullCalendar.getApi();
+      calendarApi.unselect(); // 清除当前日期选择
       this.form = {
-        id: "",
-        dateRange: "",
-        remark: "",
-        type: "",
-        isDone: false,
-        userName: "",
-        address: "",
+        id: 0,
+        isAllDay: false,
+        record_type: "日常",
+        title: undefined,
+        content: undefined,
+        repeat: "不重复",
+        alert: false,
+        pre_alert_time: undefined,
+        user_status: undefined,
+        place: undefined,
         img: "",
+        address: "",
       };
       this.filelist = [];
       this.dialogVisible = false;
@@ -873,13 +951,18 @@ export default {
     },
     // 事项删除事件
     onRemoveBtnClicked(arg) {
-      this.get("/calendar/remove", arg.event.id).then((res) => {
+      this.$axios.post(`/api/v1/private/calendar/delete_record`, {
+        id: arg.event.id
+      }).then(res => {
+        console.log(res.data)
         this.calendarOptions.events = this.calendarOptions.events.filter(
-            (item) => {
-              return item.id != arg.event.id;
+            item => {
+              return item.id !== arg.event.id;
             }
         );
-      });
+      }).catch(error => {
+        console.log(error.response)
+      })
     },
     // 当前事件绑定，此段代码可删掉
     handleEvents(events) {
@@ -1141,7 +1224,6 @@ export default {
   },
 }
 </script>
-
 <style scoped>
 #calendar-tab {
   background-color: #fff;
@@ -1160,7 +1242,6 @@ export default {
   width: 100%;
 }
 .default-page .tool-panel {
-  background-color: #f8f9fa;
   display: flex;
   flex: none;
   flex-direction: column;
@@ -1196,7 +1277,7 @@ export default {
   display: flex;
   flex: none;
   justify-content: flex-end;
-  padding: 0 0 0 16px;
+  padding: 0px;
   width: 100%;
 }
 .calendar-view .tool-bar .nav-label {
@@ -1233,23 +1314,7 @@ export default {
   min-width: 50px;
   padding: 0 5px;
 }
-.tool-bar-navigator .label-btn.align-left {
-  margin-right: 8px;
-}
-.tool-bar-navigator .btn {
-  border-radius: 4px;
-  cursor: pointer;
-  height: 22px;
-  justify-content: center;
-  margin: 1px 2px 0;
-  width: 22px;
-}
-navigator .btn {
-  align-items: center;
-  box-sizing: border-box;
-  display: flex;
-  flex: none;
-}
+
 .tool-bar-navigator .btn {
   border-radius: 4px;
   cursor: pointer;
@@ -1309,20 +1374,6 @@ navigator .btn {
   margin-right: 20px;
   padding: 0 2px;
 }
-.mode-section .label-btn {
-  align-items: center;
-  border-radius: 3px;
-  cursor: pointer;
-  display: flex;
-  flex: auto;
-  font-size: 12px;
-  justify-content: center;
-}
-.mode-section .normal-mode {
-  height: 24px;
-  margin: 3px 1px;
-  width: 56px;
-}
 .mode-section .label-btn.selected {
   background-color: #f0f4ff;
   color: #3370ff;
@@ -1352,6 +1403,9 @@ navigator .btn {
 .fc_btns {
   border: 0px solid #DCDFE6;
   padding: 8px 6px;
+}
+.fc_btns:focus {
+  border: none;
 }
 .menu-list {
   margin-right: 20px;
@@ -1390,19 +1444,11 @@ navigator .btn {
 ::v-deep .fc-timegrid-slot-label.fc-scrollgrid-shrink {
   border-top:none
 }
-/*::v-deep .fc-timegrid-slot.fc-timegrid-slot-label.fc-timegrid-slot-minor {*/
-/*  visibility: hidden;*/
-/*}*/
 ::v-deep .fc-timegrid-slot-label {
   border-bottom:none;
   width: 60px;
   padding-right: 4px;
 }
-/*::v-deep .fc-scrollgrid-shrink {*/
-/*  border-top:none;*/
-/*}*/
-/*::v-deep .fc-timegrid-slot-label.fc-scrollgrid-shrink {*/
-/*}*/
 ::v-deep .fc table {
   border-collapse: collapse;
   border-spacing: 0;
@@ -1418,7 +1464,212 @@ navigator .btn {
   display: inline-block;
   padding: 2px 4px;
 }
-/*::v-deep #calendar-tab > div > div > div.calendar-view > div.el-col.el-col-24.el-col-xs-24.el-col-md-24 > div:nth-child(1) > div > div > div > table > tbody > tr:nth-child(3) > td > div > div > div > div.fc-timegrid-slots > table > tbody > tr:nth-child(3) > td.fc-timegrid-slot.fc-timegrid-slot-label.fc-scrollgrid-shrink {*/
-/*  visibility: hidden;*/
-/*}*/
+.icon {
+  color: #8f959e;
+  cursor: default;
+  flex: none;
+  font-size: 16px;
+  margin: 0 15px 0 0;
+}
+.larkc-svg-icon {
+  fill: currentColor;
+  cursor: pointer;
+  flex: none;
+  height: 1em;
+  overflow: hidden;
+  vertical-align: -0.15em;
+  width: 1em;
+}
+.des-area {
+  align-items: center;
+  justify-content: space-between;
+  display: flex;
+  margin: 16px 7px 0;
+  overflow: visible;
+  position: relative;
+  white-space: normal;
+}
+.label-container {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+  margin-left: 7px;
+  overflow: visible;
+  white-space: nowrap;
+}
+.des-area .vmInput {
+  background: #fff;
+  border: 1px solid #dee0e3;
+  border-radius: 5px;
+  box-sizing: border-box;
+  font-size: 12px;
+  width: 405px;
+  padding-left: 15px;
+  margin-left: 3px;
+  height: 36px;
+  outline: none;
+  text-align: left;
+}
+._selection.showTriangle {
+  border: 1px solid #dee0e3;
+  padding-left: 15px;
+  margin-right: 6px;
+  border-radius: 5px;
+  width: 405px;
+  box-sizing: border-box;
+}
+._selection {
+  align-items: center;
+  color: #1f2329;
+  cursor: pointer;
+  height: 36px;
+  justify-content: space-between;
+  line-height: 34px;
+  position: relative;
+  transition: border .2s ease;
+  user-select: none;
+}
+.calendar-select .calendar-dom {
+  align-items: center;
+  display: flex;
+  font-size: 12px;
+  height: 100%;
+  overflow: hidden;
+  width: 100%;
+}
+.calendar-select .calendar-dom .color {
+  border-radius: 50%;
+  height: 12px;
+  margin-right: 7px;
+  width: 12px;
+}
+.calendar-select .calendar-dom .summary {
+  flex: none;
+  height: 100%;
+  line-height: 34px;
+  overflow: hidden;
+  padding-right: 7px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+::v-deep .el-dialog__body {
+  padding: 0px 20px;
+  color: #606266;
+  font-size: 14px;
+  word-break: break-all;
+}
+::v-deep .el-range-editor--small.el-input__inner {
+  height: 36px;
+  width: 405px;
+  margin-left: 3px;
+}
+.record-status-type {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  overflow: visible;
+  white-space: nowrap;
+}
+::v-deep .record-status-type .el-input__inner{
+  height: 36px;
+  margin-left: 3px;
+}
+::v-deep .record-status-type .el-select {
+  display: inline-block;
+  position: relative;
+  margin-left: 17px;
+}
+::v-deep .record-status-type .el-input__icon {
+  height: 100%;
+  width: 25px;
+  text-align: center;
+  transition: all .3s;
+  line-height: 36px;
+}
+::v-deep .v-calendar .input-field input {
+  padding-right: 46px;
+}
+.now-data-myself {
+  width: 35%;
+  position: absolute;
+  border-right: 1px solid rgba(227, 227, 227, 0.6);
+}
+.con {
+  position: relative;
+  max-width: 280px;
+  margin: auto;
+}
+::v-deep .con .wh_content_all {
+  background: transparent !important;
+}
+::v-deep .wh_top_changge li {
+  color: #F56C6C !important;
+  font-size: 15px !important;
+}
+::v-deep .wh_content_item, .wh_content_item_tag {
+  color: #303133 !important;
+}
+::v-deep .wh_content_item .wh_isToday {
+  background: #00d985  !important;
+  color: #fff  !important;
+}
+::v-deep .wh_content_item .wh_chose_day {
+  background: #409EFF  !important;
+  color: #ffff  !important;
+}
+::v-deep .wh_item_date:hover {
+  background: rgb(217, 236, 255) !important;
+  border-radius: 100px !important;
+  color: rgb(102, 177, 255)  !important;
+}
+::v-deep .wh_jiantou1[data-v-2ebcbc83] {
+  border-top: 2px solid #909399;
+  border-left: 2px solid #909399;
+  width: 7px;
+  height: 7px;
+}
+::v-deep .wh_jiantou2[data-v-2ebcbc83] {
+  border-top: 2px solid #909399;
+  border-right: 2px solid #909399;
+  width: 7px;
+  height: 7px;
+}
+::v-deep .wh_item_date[data-v-2ebcbc83], .wh_top_tag[data-v-2ebcbc83] {
+  width: 30px;
+  height: 30px;
+  line-height: 40px;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+::v-deep .wh_top_tag[data-v-2ebcbc83] {
+  color: #409EFF;
+  border-top: 1px solid rgba(227, 227, 227, 0.6);
+  border-bottom: 1px solid rgba(227, 227, 227, 0.6);
+}
+::v-deep .wh_container[data-v-2ebcbc83] {
+  max-width: 280px;
+}
+::v-deep .wh_top_changge[data-v-2ebcbc83] {
+  display: flex;
+  width: 57%;
+  margin-left: 38%;
+}
+::v-deep .now-data-myself-time {
+  color: #F56C6C;
+  font-size: 28px;
+  height: 30px;
+  text-align: center;
+  font-family: "Helvetica Neue";
+}
+::v-deep .now-data-myself-week {
+  font-size: 10px;
+  color: #909399;
+  text-align: center;
+}
+::v-deep .wh_top_changge .wh_content_li[data-v-2ebcbc83] {
+  font-family: Helvetica;
+}
 </style>
