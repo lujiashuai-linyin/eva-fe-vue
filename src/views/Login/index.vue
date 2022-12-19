@@ -64,6 +64,7 @@ export default {
           // console.log("expiresAt", expires)
           cookie.set("x-token", response.data.data.token, {domain:'localhost', expires: 7})
           cookie.set("username", response.data.data.username, {domain:'localhost', expires: 7})
+          cookie.set("avatar", response.data.data.avatar, {domain:'localhost', expires: 7})
         }
         // 页面跳转
         let self = this
@@ -159,7 +160,9 @@ export default {
   margin: 0 auto;
   /*padding-bottom: 40px;*/
 }
-
+::v-deep .el-form-item {
+  margin-bottom: 17px;
+}
 ::v-deep .el-input {
   position: relative;
   font-size: 14px;
@@ -176,6 +179,7 @@ export default {
   line-height: 28px;
   color: #000;
   margin: 16px 0 6px;
+  padding-top: 5px;
 }
 #login_entry {
   font-family: PingFang SC,helvetica,arial,微软雅黑,华文黑体;

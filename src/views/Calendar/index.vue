@@ -16,6 +16,7 @@
           </div>
         </div>
         <div class="calendar-view">
+          <!-- 日历标题部分 -->
           <div style="width: 100%;">
             <div class="tool-bar tool-bar-timeRight lark-draggable" style="height: 60px;">
               <div class="nav-label">
@@ -90,7 +91,7 @@
                   <div class="_pp-trigger-container _pp-control-close">
                     <div class="_pp-header-avatar-box">
                       <div class="_pp-header-avatar">
-                        <img src="https://s1-imfile.feishucdn.com/static-resource/v1/v2_7cd110ab-3889-4505-8d46-b9e8fde9532g~?image_size=noop&amp;cut_type=&amp;quality=&amp;format=image&amp;sticker_format=.webp">
+                        <img :src="avatar">
                       </div>
                     </div>
                   </div>
@@ -101,7 +102,155 @@
           <!-- 日历本体 -->
           <el-col>
             <div style="margin-left: 0px">
-              <FullCalendar ref="fullCalendar" :options="calendarOptions" />
+              <FullCalendar ref="fullCalendar" :options="calendarOptions">
+                <!-- 事件弹窗 -->
+                <template v-slot:eventContent="arg">
+                  <el-popover
+                      :append-to-body="true"
+                      ref="popover1"
+                      placement="top-start"
+                      width="220"
+                      :visible-arrow="true"
+                      trigger="hover"
+                      :teleported="false"
+                      popper-class="popover"
+                      :open-delay="100"
+                      @show="showPic(arg)"
+                      @hide="popoverPicReset(arg)"
+                  >
+                    <el-row class="popover_title">
+                      <el-col
+                          :span="12"
+                          :style="{
+                      color:
+                        arg.event.extendedProps.isDone === false
+                          ? 'red'
+                          : 'green',
+                    }"
+                      >
+                    <span
+                        style="padding-right: 2px"
+                        :style="{
+                        'border-left':
+                          arg.event.extendedProps.isDone === false
+                            ? '5px solid red'
+                            : '5px solid green',
+                      }"
+                    ></span
+                    >{{
+                          arg.event.extendedProps.isDone === false
+                              ? "未开始"
+                              : "已完成"
+                        }}</el-col
+                      >
+                      <el-col
+                          :span="12"
+                          style="
+                      display: flex;
+                      flex-direction: row-reverse;
+                      font-size: 14px;
+                      color: #000;
+                    "
+                      >{{
+                          arg.event.allDay === true
+                              ? "全天"
+                              : formatTimer(arg.event.start)
+                        }}</el-col
+                      >
+                    </el-row>
+                    <el-row>
+                      <el-col :span="24" style="text-align: center">
+                        <el-image
+                            v-if="popoverimg.length !== 0"
+                            :src="popoverimg[0]"
+                            @click="PreviewPic(popoverimg)"
+                            fit="fill"
+                            class="popoverShowImg"
+                        ><div slot="placeholder" class="image-slot">
+                          加载中<span class="dot">...</span>
+                        </div></el-image
+                        >
+                        <div class="block"></div>
+                      </el-col>
+                    </el-row>
+                    <el-row class="popover_content">
+                      <el-col :span="24" style="max-height: 150px; overflow: auto">
+                        <span class="click">{{ arg.event.title }}</span>
+                      </el-col>
+                      <el-col :span="24">
+                        <el-link
+                            v-if="
+                        arg.event.extendedProps.address != null &&
+                        arg.event.extendedProps.address !== ''
+                      "
+                            :href="undefined"
+                            :underline="false"
+                            @click="fileDownload(arg.event.extendedProps.address)"
+                            class="link"
+                        >{{
+                            arg.event.extendedProps.address === null
+                                ? ""
+                                : arg.event.extendedProps.address.replace(
+                                    "D:\\flask\\upload\\",
+                                    ""
+                                )
+                          }}</el-link
+                        ></el-col
+                      >
+                    </el-row>
+
+                    <el-row style="margin-top: 5px"
+                    ><el-col style="width: 15%"
+                    ><div>
+                      <el-button
+                          class="hvr-icon-pulse-grow"
+                          :popperAppendToBody="false"
+                          size="mini"
+                          icon="el-icon-edit hvr-icon"
+                          type="primary"
+                          circle
+                          @click="handleEventClick(arg)"
+                      >
+                      </el-button>
+                    </div>
+                    </el-col>
+                      <el-col style="width: 15%"
+                      ><el-button
+                          class="hvr-icon-bounce"
+                          size="mini"
+                          type="success"
+                          icon="el-icon-document-checked hvr-icon"
+                          circle
+                          @click="onCheckBtnClicked(arg)"
+                      >
+                      </el-button>
+                      </el-col>
+                      <el-col style="width: 15%"
+                      ><el-popconfirm
+                          confirm-button-text="好"
+                          cancel-button-text="否"
+                          icon="el-icon-info"
+                          icon-color="red"
+                          title="确定删除这个事项吗？"
+                          @confirm="onRemoveBtnClicked(arg)"
+                      ><el-button
+                          class="hvr-icon-buzz-out"
+                          slot="reference"
+                          size="mini"
+                          type="danger"
+                          icon="el-icon-delete hvr-icon"
+                          circle
+                      >
+                      </el-button
+                      ></el-popconfirm> </el-col
+                      ></el-row>
+                    <div slot="reference">
+                      <span class="tree_span_text">{{ arg.timeText }}</span>
+                      <span>{{ arg.event.title }}</span>
+                    </div>
+                  </el-popover>
+                </template>
+              </FullCalendar>
             </div>
             <!-- 事件添加或修改对话框 -->
             <el-dialog
@@ -114,6 +263,9 @@
             >
               <div slot="title" class="header-title" :style="{ color: 'black' }">
                 <i class="el-icon-edit"></i><span> &nbsp;日程</span>
+                <i class="el-icon-more" style="float: right;margin-right: 30px; cursor: pointer"></i>
+                <i class="el-icon-delete" style="float: right;margin-right: 10px; cursor: pointer" @click="RemoveRecordByID"></i>
+                <i class="el-icon-share" style="float: right;margin-right: 10px; cursor: pointer"></i>
               </div>
               <el-form ref="form" :model="form" label-width="80px">
                 <el-row>
@@ -142,7 +294,7 @@
                 <el-row>
                     <div class="des-area">
                       <div class="record-status-type">
-                        <svg t="1669203395674" class="icon" style="margin-left: -4px;margin-right: -5px" viewBox="0 0 1024 1024" width="23" height="23"><path d="M516.8 441.3h324.6c11.3 0 20.5 9.2 20.5 20.5s-9.2 20.5-20.5 20.5H516.8c-11.3 0-20.5-9.2-20.5-20.5s9.2-20.5 20.5-20.5zM516.8 605.1h324.6c11.3 0 20.5 9.2 20.5 20.5s-9.2 20.5-20.5 20.5H516.8c-11.3 0-20.5-9.2-20.5-20.5 0-11.4 9.2-20.5 20.5-20.5zM516.8 768.8h324.6c11.3 0 20.5 9.2 20.5 20.5s-9.2 20.5-20.5 20.5H516.8c-11.3 0-20.5-9.2-20.5-20.5s9.2-20.5 20.5-20.5z" p-id="2555" fill="#707070"></path><path d="M411.3 504.3H206.6c-12.2 0-22-9.9-22-22V277.6c0-12.1 9.8-22 22-22h204.7c12.2 0 22 9.9 22 22v204.6c0 12.2-9.8 22.1-22 22.1z m-182.7-44h160.7V299.6H228.6v160.7zM411.3 831.7H206.6c-12.2 0-22-9.9-22-22V605.1c0-12.1 9.8-22 22-22h204.7c12.2 0 22 9.9 22 22v204.7c0 12.1-9.8 21.9-22 21.9z m-182.7-44h160.7V627.1H228.6v160.6z" p-id="2556" fill="#707070"></path><path d="M516.8 277.6h324.6c11.3 0 20.5 9.2 20.5 20.5s-9.2 20.5-20.5 20.5H516.8c-11.3 0-20.5-9.2-20.5-20.5s9.2-20.5 20.5-20.5z" p-id="2557" fill="#707070"></path></svg>
+                        <svg t="1669203395674" class="icon" style="margin-left: -4px;margin-right: -5px;cursor: pointer" viewBox="0 0 1024 1024" width="23" height="23"><path d="M516.8 441.3h324.6c11.3 0 20.5 9.2 20.5 20.5s-9.2 20.5-20.5 20.5H516.8c-11.3 0-20.5-9.2-20.5-20.5s9.2-20.5 20.5-20.5zM516.8 605.1h324.6c11.3 0 20.5 9.2 20.5 20.5s-9.2 20.5-20.5 20.5H516.8c-11.3 0-20.5-9.2-20.5-20.5 0-11.4 9.2-20.5 20.5-20.5zM516.8 768.8h324.6c11.3 0 20.5 9.2 20.5 20.5s-9.2 20.5-20.5 20.5H516.8c-11.3 0-20.5-9.2-20.5-20.5s9.2-20.5 20.5-20.5z" p-id="2555" fill="#707070"></path><path d="M411.3 504.3H206.6c-12.2 0-22-9.9-22-22V277.6c0-12.1 9.8-22 22-22h204.7c12.2 0 22 9.9 22 22v204.6c0 12.2-9.8 22.1-22 22.1z m-182.7-44h160.7V299.6H228.6v160.7zM411.3 831.7H206.6c-12.2 0-22-9.9-22-22V605.1c0-12.1 9.8-22 22-22h204.7c12.2 0 22 9.9 22 22v204.7c0 12.1-9.8 21.9-22 21.9z m-182.7-44h160.7V627.1H228.6v160.6z" p-id="2556" fill="#707070"></path><path d="M516.8 277.6h324.6c11.3 0 20.5 9.2 20.5 20.5s-9.2 20.5-20.5 20.5H516.8c-11.3 0-20.5-9.2-20.5-20.5s9.2-20.5 20.5-20.5z" p-id="2557" fill="#707070"></path></svg>
                         <el-select v-model="form.record_type" placeholder="日程类型">
                           <el-option
                               v-for="item in record_type_list"
@@ -308,6 +460,7 @@ export default {
 
       show_tool_panel: true,
       username: '',
+      avatar: '',
       istoday: false,
       current_label: '',
       triger: '<<收起',
@@ -351,7 +504,8 @@ export default {
         isAllDay: false,
         record_type: "日常",
         title: undefined,
-        content: undefined,
+        content: "",
+        alert_method: "email",
         repeat: "不重复",//每天，每周，每月，每年
         alert: false,//是否提醒
         pre_alert_time: undefined,
@@ -550,6 +704,7 @@ export default {
     console.log("calendarApi:", this.calendarApi)
     this.title = this.calendarApi.view.title;
     this.username = cookie.get("username")
+    this.avatar = cookie.get("avatar")
   },
   created() {
     let now = new Date();
@@ -655,17 +810,15 @@ export default {
     },
     // 事项调整时间区间事件
     onEventResize(arg) {
-      let newTimeStart = this.dateFormat(
-          "YYYY-mm-dd HH:MM:SS",
-          arg.event.startStr
-      );
-      let newTimeEnd = this.dateFormat("YYYY-mm-dd HH:MM:SS", arg.event.endStr);
-      this.get("/calendar/updateTime", {
-        id: arg.event.id,
-        Start: newTimeStart,
-        End: newTimeEnd,
+      let newTimeStart = moment(arg.event.start).toISOString();
+      let newTimeEnd = moment(arg.event.end).toISOString();
+      console.log(newTimeStart, newTimeEnd)
+      this.$axios.post("/api/v1/private/calendar/update_end_time", {
+        id: Number(arg.event.id),
+        start_time: newTimeStart,
+        end_time: newTimeEnd,
       }).then((res) => {
-        this.$message.success(res.data.info);
+        console.log(res.data)
       });
       // 必须加这句，不然切换视图会有显示事件数目的bug
       let calendarApi = arg.view.calendar;
@@ -693,7 +846,7 @@ export default {
       let calendarApi = arg.view.calendar;
       this.popoverimg = [];
 
-      await this.post("/get_img_url", arg.event.extendedProps.img, "blob").then(
+      await this.$axios.post("/get_img_url", arg.event.extendedProps.img, "blob").then(
           (res) => {
             // console.log(res.data.imgs);
             res.data.imgs.forEach((item, index) => {
@@ -758,8 +911,9 @@ export default {
               this.calendarOptions.events = [];
               response.data.data.forEach((item) => {
                 let is_Done = moment.utc(item.end_time).toDate() < new Date();
+                console.log(item)
                 let data = {
-                  id: item.id,
+                  id: item.ID,
                   title: item.title,
                   start: item.start_time,
                   end: item.end_time,
@@ -767,10 +921,17 @@ export default {
                   className: is_Done? "borderGreen": "borderOrange",// 是否完成
                   // 非标准字段:除上述字段外，您还可以在每个事件对象中包含自己的非标准字段。FullCalendar不会修改或删除这些字段。例如，开发人员通常包括描述在回调中使用的字段，如事件呈现挂钩. 任何非标准属性都将移动到extendedProps哈希期间事件解析.
                   extendedProps: {
+                    alert: item.alert,
+                    content: item.content,
                     isDone: is_Done,
                     img: item.img,
                     address: item.address,
-                    type: item.type,
+                    record_type: item.record_type,
+                    repeat: item.repeat,
+                    pre_alert_time: item.pre_alert_time,
+                    user_status: item.user_status,
+                    place: item.place,
+                    alert_method: item.alert_method,
                   },
                   others: "该字段值会被自动归类到extendedProps里面",
                   textColor: "#2c3e50",
@@ -818,6 +979,7 @@ export default {
           title: this.form.title,
           content: this.form.content,
           alert: this.form.alert,
+          alert_method: this.form.alert_method,
           pre_alert_time: this.form.pre_alert_time === undefined ? "5" : this.form.pre_alert_time.toString(),
           address: this.form.address === undefined ? "" : this.form.address,
           user_status: this.form.user_status === undefined ? "忙碌": this.form.user_status,
@@ -834,7 +996,7 @@ export default {
       } else if (this.form_edited_state === "amend") {
         // 修改事件的后端数据请求
         this.$axios.post(`/api/v1/private/calendar/update_record`, {
-          id: this.form.id,
+          id: Number(this.form.id),
           is_all_day: this.form.isAllDay,
           start_time: startTime,
           end_time: endTime,
@@ -842,7 +1004,8 @@ export default {
           title: this.form.title,
           content: this.form.content,
           alert: this.form.alert,
-          pre_alert_time: this.form.pre_alert_time === undefined ? [5] : this.form.pre_alert_time,
+          alert_method: this.form.alert_method,
+          pre_alert_time: this.form.pre_alert_time === undefined ? '5' : this.form.pre_alert_time.toString(),
           address: this.form.address === undefined ? "" : this.form.address,
           user_status: this.form.user_status === undefined ? "忙碌": this.form.user_status,
           repeat: this.form.repeat,
@@ -883,6 +1046,7 @@ export default {
     // 点击事项事件
     handleEventClick(clickInfo) {
       this.dialogVisible = true;
+      console.log("事件修改")
       this.form_edited_state = "amend"; //修改状态
       var startTime = this.dateFormat(
           "YYYY-mm-dd HH:MM:SS",
@@ -895,71 +1059,89 @@ export default {
       // 设置打开对话框各部分的显示值
       this.form.id = clickInfo.event.id;
       this.dateRange = [clickInfo.event.start, clickInfo.event.end];
-      this.form.remark = clickInfo.event.title;
+      this.form.title = clickInfo.event.title;
+      this.form.content = clickInfo.event.extendedProps.content;
+      this.form.record_type = clickInfo.event.extendedProps.record_type;
+      this.form.isAllDay = clickInfo.event.allDay;
+      this.form.alert = clickInfo.event.extendedProps.alert;
+      this.form.alert_method = clickInfo.event.extendedProps.alert_method;
       // 获取当前登录用户的名字
-      let info = JSON.parse(localStorage.getItem("userInfo"));
-      this.form.userName = info.username;
-      this.form.isDone =
-          clickInfo.event.extendedProps.isDone == true ? "0" : "1";
+      this.form.userName = this.username;
       this.form.img = clickInfo.event.extendedProps.img;
       this.form.address = clickInfo.event.extendedProps.address;
-      this.form.category =
-          clickInfo.event.extendedProps.type == undefined
-              ? ""
-              : clickInfo.event.extendedProps.type;
+      this.form.place = clickInfo.event.extendedProps.place;
+      this.form.pre_alert_time = clickInfo.event.extendedProps.pre_alert_time;
+      this.form.repeat = clickInfo.event.extendedProps.repeat;
+      this.form.user_status = clickInfo.event.extendedProps.user_status;
+      console.log(this.form)
       // 请求后端图片URL方法
-      this.post("/get_img_url", clickInfo.event.extendedProps.img).then(
-          (res) => {
-            res.data.imgs.forEach((item, index) => {
-              const img = "data:image/png;base64," + item;
-              this.file = this.base64ImgtoFile(img); // 得到File对象
-              const url =
-                  window.webkitURL.createObjectURL(this.file) ||
-                  window.URL.createObjectURL(this.file);
-              this.filelist.push({
-                name: res.data.origin_url[index],
-                url: url,
-              });
-            });
-          }
-      );
+      // this.post("/get_img_url", clickInfo.event.extendedProps.img).then(
+      //     (res) => {
+      //       res.data.imgs.forEach((item, index) => {
+      //         const img = "data:image/png;base64," + item;
+      //         this.file = this.base64ImgtoFile(img); // 得到File对象
+      //         const url =
+      //             window.webkitURL.createObjectURL(this.file) ||
+      //             window.URL.createObjectURL(this.file);
+      //         this.filelist.push({
+      //           name: res.data.origin_url[index],
+      //           url: url,
+      //         });
+      //       });
+      //     }
+      // );
     },
     // 事项标记已完成或改为未完成的事件
-    onCheckBtnClicked(arg) {
-      this.get(
-          "/calendar/checked",
-          { id: arg.event.id, status: arg.event.extendedProps.isDone },
-          ""
-      ).then((res) => {
-        this.calendarOptions.events.filter((item) => {
-          if (item.id == arg.event.id) {
-            item.extendedProps.isDone = !arg.event.extendedProps.isDone;
-            arg.event.extendedProps.isDone == true
-                ? (item.className = "borderOrange")
-                : (item.className = "borderGreen");
-            item.backgroundColor =
-                (arg.event.allDay == true ? "all_Day" : "other") != "all_Day"
-                    ? arg.event.extendedProps.isDone == true
-                        ? "#FFECDC"
-                        : "#c2fccd"
-                    : "#66b1ff";
-          }
-          return item;
-        });
-        this.$message.success("事件状态修改成功！");
-      });
-    },
+    // onCheckBtnClicked(arg) {
+    //   this.get(
+    //       "/calendar/checked",
+    //       { id: arg.event.id, status: arg.event.extendedProps.isDone },
+    //       ""
+    //   ).then((res) => {
+    //     this.calendarOptions.events.filter((item) => {
+    //       if (item.id == arg.event.id) {
+    //         item.extendedProps.isDone = !arg.event.extendedProps.isDone;
+    //         arg.event.extendedProps.isDone == true
+    //             ? (item.className = "borderOrange")
+    //             : (item.className = "borderGreen");
+    //         item.backgroundColor =
+    //             (arg.event.allDay == true ? "all_Day" : "other") != "all_Day"
+    //                 ? arg.event.extendedProps.isDone == true
+    //                     ? "#FFECDC"
+    //                     : "#c2fccd"
+    //                 : "#66b1ff";
+    //       }
+    //       return item;
+    //     });
+    //     this.$message.success("事件状态修改成功！");
+    //   });
+    // },
     // 事项删除事件
     onRemoveBtnClicked(arg) {
       this.$axios.post(`/api/v1/private/calendar/delete_record`, {
-        id: arg.event.id
+        id: Number(arg.event.id)
       }).then(res => {
         console.log(res.data)
         this.calendarOptions.events = this.calendarOptions.events.filter(
             item => {
-              return item.id !== arg.event.id;
+              return Number(item.id) !== Number(this.form.id);
             }
         );
+      }).catch(error => {
+        console.log(error.response)
+      })
+    },
+    RemoveRecordByID() {
+      this.$axios.post(`/api/v1/private/calendar/delete_record`, {
+        id: Number(this.form.id)
+      }).then(res => {
+        console.log(res.data)
+        this.calendarOptions.events = this.calendarOptions.events.filter(
+            item => {
+              return Number(item.id) !== Number(this.form.id);
+            }
+        );
+        this.cancel()
       }).catch(error => {
         console.log(error.response)
       })
@@ -1031,12 +1213,12 @@ export default {
     handleRemove(file) {
       let address = this.form.img.split(",");
       address = address.filter((item) => {
-        return item != file.name;
+        return item !== file.name;
       });
       address = address.join(",");
       this.form.img = address;
       const newArray = this.filelist.filter((item, index) => {
-        return item.uid != file.uid;
+        return item.uid !== file.uid;
       });
       this.filelist = newArray;
     },

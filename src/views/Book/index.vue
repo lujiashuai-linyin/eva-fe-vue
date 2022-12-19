@@ -40,12 +40,75 @@
           <!--            <li @click="filters.type=1" class="hot" :class="filters.type==1?'this':''">人气</li>-->
           <!--            <li @click="filters.type=2" class="price" :class="filters.type==2?'this':''">价格</li>-->
         </ul>
-        <p class="condition-result">共21个课程</p>
+        <p class="condition-result">共21本</p>
       </div>
 
     </div>
+    <!-- 栏目-人气风向标 && 小说热榜 -->
     <div class="book-content">
-      
+      <!-- 主内容 -->
+      <div class="left-part" style="width: 880px">
+      <!-- 内容标题 -->
+        <div class="common-title">
+          <h3 class="title-text">
+            <svg t="1671451171089" class="icon" viewBox="0 0 1024 1024" version="1.1" p-id="2679" width="20" height="20">
+              <path d="M114.0736 546.304l751.1552-371.712-529.0496 444.7232zM951.7568 159.8976L556.0832 678.4l348.8768 58.9312 21.9648-14.592z" fill="#FBC07C" p-id="2680"></path><path d="M874.9056 216.9344l-477.6448 423.5264 99.7888 212.1728 8.6528-186.9312z" fill="#FC9553" p-id="2681"></path><path d="M542.72 888.3712v-185.0368l10.9056-15.104 115.712 17.2544z" fill="#E56234" p-id="2682"></path><path d="M962.4064 96.3072c-1.8432-1.8432-4.0448-3.072-6.3488-3.84-4.0448-1.6896-8.704-1.7408-12.9536 0.2048-7.2192 3.3792-722.5856 339.6096-874.9568 410.368a27.23328 27.23328 0 0 0-15.7696 26.6752 27.09504 27.09504 0 0 0 19.2512 24.2688l253.9008 78.1312 164.4032 312.7296a16.44032 16.44032 0 0 0 14.592 8.8064c0.1024 0 0.2048-0.0512 0.3072-0.0512 0.8192 0.1024 1.6384 0.2048 2.4576 0.2048 5.4272 0 10.6496-2.6112 13.8752-7.2704l148.7872-214.8864c5.888-7.3728 10.2912-13.056 13.5168-17.5104l217.7536 38.0928c3.072 0.9728 6.2976 1.4336 9.472 1.4336 6.1952 0 12.3392-1.792 17.5616-5.3248a31.6928 31.6928 0 0 0 14.0288-25.088l24.7808-611.9424c0.0512-0.768-0.0512-1.536-0.1024-2.2528 0.4608-4.5056-1.024-9.2672-4.5568-12.7488zM852.48 169.216L332.6976 602.2144l-243.712-74.9568C217.1392 467.6096 651.4688 263.6288 852.48 169.216z m-496.9472 453.9904l481.8432-401.408-320.0512 404.7872-24.6272 30.8224-2.3552 4.7104v217.4976l-134.8096-256.4096z m289.8432 89.9584l-124.3648 179.5584v-206.8992l128 22.3744c-1.792 2.4576-3.1744 4.352-3.6352 4.9664z m266.1888 8.96v0.0512c0 0.1536 0 0.4608-0.4096 0.7168-0.3584 0.256-0.6656 0.1536-0.8192 0.1024l-1.3312-0.512-229.5296-40.1408-146.4832-26.0608 7.6288-9.6256L934.5536 153.6l-22.9888 568.5248z" fill="#333333" p-id="2683"></path>
+            </svg>
+            <span class="main-title">人气风向标</span>
+            <span class="sub-title">(更新稳定有特点)......</span>
+          </h3>
+        </div>
+        <ul class="story-list">
+<!--          <li v-for="(item, index) in hot_book_list" :key="index">-->
+          <li>
+            <div class="pic">
+              <a href="/Novel/598582/">
+                <img data-original="//rs.sfacg.com/web/novel/images/NovelCover/Big/2022/11/98c4add7-6ce7-4a7c-a665-589737100cf5.jpg" class="block-img" alt="女主们怎么都喜欢上了黄毛助攻？" src="//rs.sfacg.com/web/novel/images/NovelCover/Big/2022/11/98c4add7-6ce7-4a7c-a665-589737100cf5.jpg" style="display: block;">
+              </a>
+              <div class="info-layer">
+                <a href="/Novel/598582/" target="_blank">
+                  <div class="bg"></div>
+                  <div class="on">
+                    <div class="author-info">
+                      <span href="" class="mask">
+                          <img src="https://rss.sfacg.com/web/account/images/avatars/app/2210/25/6f9e0ce0-f387-47d8-a53e-5953e912d2d4.jpg" class="block-img" alt="" style="">
+                      </span>
+                      <span class="name">风烟雨霖</span>
+                    </div>
+                    <div class="book-info">
+                      <p>字数：<span class="highlight">206258</span>字</p>
+                      <p>人气：<span class="highlight">1116937</span></p>
+                      <p>收藏：<span class="highlight">11243</span></p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            </div>
+            <p class="title">
+              <a href="/Novel/598582/">女主们怎么都喜欢上了黄毛助攻？</a>
+            </p>
+            <p class="desc">
+            </p>
+          </li>
+        </ul>
+      </div>
+      <!-- 排行 -->
+      <div class="right-part" style="width: 280px">
+        <div class="common-title">
+          <h3 class="title-text">
+            <span class="main-title">轻小说热榜</span>
+          </h3>
+          <!-- tab切换导航 -->
+          <div class="tab-nav clearfix">
+            <div @click="hot_tab='周'" :class="hot_tab === '周'? 'nav-item active': 'nav-item'">
+              周
+            </div>
+            <div @click="hot_tab='月'" :class="hot_tab === '月'? 'nav-item active': 'nav-item'">
+              月
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -82,7 +145,9 @@ export default {
         orders: "desc",  // 排序类型[控制样式]，desc表示降序，asc表示升序
         size: 5, // 单页数据量
         page: 1, // 当前页码
-      }
+      },
+      hot_book_list: [],
+      hot_tab: '周',
     }
   },
   methods: {
@@ -346,6 +411,97 @@ export default {
  .book .ordering .desc::after{
    border-top-color: #ffc210;
  }
-
-
+ .common-title {
+   position: relative;
+   height: 45px;
+   border-bottom: 1px solid #dbdbdb;
+ }
+ .common-title .title-text {
+   font-weight: normal;
+   color: #666;
+ }
+ .common-title .main-title {
+   margin-right: 10px;
+   color: #333;
+   font-size: 24px;
+   vertical-align: middle;
+   line-height: 1;
+ }
+ .common-title .sub-title {
+   font-size: 16px;
+   vertical-align: bottom;
+ }
+ .book-content{
+   display: flex;
+   flex-direction: row;
+   align-items: flex-start;
+   justify-content: space-between;
+   width: 1200px;
+ }
+ .story-list {
+   padding-top: 10px;
+   width: 936px;
+ }
+.story-list li {
+   float: left;
+   width: 130px;
+   height: 250px;
+   padding: 10px 0 15px;
+   margin-right: 57px;
+   line-height: 1.5;
+ }
+.block-img {
+  width: 130px;
+  height: 163px;
+}
+.story-list .info-layer {
+   display: none;
+   position: absolute;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   padding: 10px 0 0 10px;
+}
+.story-list .title a {
+  color: #333;
+}
+.story-list .title {
+   padding: 5px 0;
+   text-align: center;
+   font-size: 14px;
+}
+.story-list .desc {
+   color: #666;
+   font-size: 12px;
+}
+ul, li {
+ padding: 0;
+ margin: 0;
+ list-style: none;
+}
+a {
+ text-decoration: none;
+ background: transparent;
+}
+ .tab-nav {
+   position: absolute;
+   bottom: -2px;
+   right: 0;
+ }
+.tab-nav .nav-item {
+   display: inline-block;
+   float: left;
+   padding: 0 8px;
+  width: 16px;
+   height: 28px;
+   margin-right: 5px;
+   text-align: right;
+  cursor: pointer;
+ }
+.tab-nav .active {
+   height: 25px;
+   border-bottom: 3px solid #f90;
+   color: #f90;
+ }
 </style>

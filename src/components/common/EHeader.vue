@@ -35,6 +35,9 @@
                 <div @click="logoutHander">
                   <el-dropdown-item>注销</el-dropdown-item>
                 </div>
+                <div v-if="this.$store.state.name === 'admin'" @click="startJob">
+                  <el-dropdown-item>启动提醒服务</el-dropdown-item>
+                </div>
               </el-dropdown-menu>
             </el-dropdown>
           </div>
@@ -112,6 +115,9 @@ export default {
   methods: {
     Goto(router) {
       this.$router.push(router)
+    },
+    startJob() {
+      this.$axios.get("/api/v1/private/calendar/start_job_server", {})
     },
     logoutHander() {
       console.log("注销")

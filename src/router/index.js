@@ -6,7 +6,7 @@ import Book from '@/views/Book'
 import Login from '@/views/Login'
 import Register from '@/views/Register'
 import Calendar from '@/views/Calendar'
-import Demo from '@/views/Demo'
+import Demo from '@/views/Demo/index1'
 
 Vue.use(VueRouter)
 
