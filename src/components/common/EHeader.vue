@@ -123,7 +123,7 @@ export default {
       console.log("注销")
       cookie.remove("x-token")
       cookie.remove("username")
-      this.$router.push("/login")
+      this.$router.push("/login/platform")
     }
   }
 }

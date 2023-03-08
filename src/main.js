@@ -13,7 +13,7 @@ import axios from "axios";
 import cookie from 'js-cookie';
 //创建默认实列
 const instance=axios.create({
-  baseURL:'http://localhost:9999',
+  baseURL:'http://10.248.153.74:9999',
   timeout:5000,
 });
 //拦截器

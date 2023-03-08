@@ -23,7 +23,7 @@
               <a href="#" class="link" id="forgetpwd" target="_blank">找回密码</a>
             </div>
             <div>
-              <a href="/register" class="link">注册帐号</a>
+              <router-link :to="{ path: '/register/' + type }" class="link">注册帐号</router-link>
             </div>
             <div>
               <a class="link" id="feedback_web" href="#" target="_blank">意见反馈</a>
@@ -37,6 +37,7 @@
 
 <script>
 import cookie from 'js-cookie';
+
 export default {
   data() {
     return {
@@ -44,13 +45,26 @@ export default {
       login_method:0,
       user_id: '',
       labelPosition: 'left',
+      type: '',
       formLabelAlign: {
         username: '',
         password: '',
       }
     };
   },
+  created() {
+    this.initData()
+  },
   methods: {
+    initData() {
+      // 获取当前URL的path
+      const path = this.$router.currentRoute.path
+
+      // 获取URL中最后一个/后的字段
+      const pathArray = path.split('/')
+      this.type = pathArray.pop()
+      console.log(this.type)
+    },
     loginhandler () {
       // 用户密码账号登录
       this.$axios.post(`/base/login`, {
@@ -65,12 +79,17 @@ export default {
           cookie.set("x-token", response.data.data.token, {domain:'localhost', expires: 7})
           cookie.set("username", response.data.data.username, {domain:'localhost', expires: 7})
           cookie.set("avatar", response.data.data.avatar, {domain:'localhost', expires: 7})
+          cookie.set("nickname", response.data.data.avatar, {domain:'localhost', expires: 7})
         }
         // 页面跳转
         let self = this
         this.$alert('登录成功!', 'EVA', {
           callback () {
-            self.$router.push('/')
+            if (self.type === 'chat') {
+              window.location.href = "http://localhost:3000/"
+            } else {
+              self.$router.push('/')
+            }
             // self.$router.go(-1);
           }
         })

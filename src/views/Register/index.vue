@@ -152,7 +152,11 @@ export default {
           let self = this
           this.$alert('注册成功!', 'eva', {
             callback() {
-              self.$router.push('/login')
+              if (self.$router.currentRoute.path.split('/').pop() === 'chat') {
+                self.$router.push('/login/chat')
+              } else {
+                self.$router.push('/login')
+              }
               // self.$router.go(-1);
             }
           })

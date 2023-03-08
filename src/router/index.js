@@ -44,13 +44,13 @@ const routes = [
     component: Demo,
   },
   {
-    path: '/login',
+    path: '/login/:type',
     name: 'login',
     meta: {title: '登录'},
     component: Login,
   },
   {
-    path: '/register',
+    path: '/register/:type',
     name: 'register',
     meta: {title: '注册'},
     component: Register,
